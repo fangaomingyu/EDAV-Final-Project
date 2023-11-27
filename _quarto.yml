@@ -8,9 +8,9 @@ execute:
 book:
   title: "YOUR PROJECT TITLE"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
+    - Gaomingyu Fan (gf2514)
+    - Zhaoyi Yu ()
+  repo-url: https://github.com/fangaomingyu/EDAV-Final-Project
   date: today
   page-footer:
     right: |
