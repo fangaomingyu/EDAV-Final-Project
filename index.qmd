@@ -1,3 +1,12 @@
 # Introduction
-"Trends and Patterns in the Leading Causes of Death in the United States Over the Past Decade"
-We will explore how the leading causes of death have changed over the past decade.
+Chosen Topic:
+"Understanding Vaccination Coverage Trends and Disparities Among Young Children Across Different Regions and Demographics"
+
+We want to choose this topic as vaccination is a critical tool in preventing infectious diseases, and understanding its coverage and disparities is key to ensuring the health and well-being of children worldwide. Despite the known benefits of vaccines, there are significant disparities in vaccination coverage. These disparities can be due to a variety of factors including socio-economic status, geographical location, access to healthcare, etc. Understanding these disparities is crucial for designing targeted interventions to improve vaccination rates.
+
+Questions we are interested in studying:
+1. Vaccination Rate Trends Over Time: Analyze the changes in vaccination rates among young children over several years. This would help in identifying any progress or setbacks in vaccination efforts.
+
+2. Regional and Geographical Variations: Examine how vaccination rates vary across different regions or states. This analysis could reveal areas with lower vaccination rates that might require additional public health resources.
+
+3. Demographic Analysis: Investigate vaccination rates across different demographic groups, including age, insurance coverage, urbanicity, race/ethnicity, and poverty. This could uncover disparities in vaccine coverage and help target interventions more effectively.
