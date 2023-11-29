@@ -2,4 +2,63 @@
 
 ## Description
 
+### Data Source 1
+The first dataset we use is the United States Cancer Statistics (USCS) from the CDC's WONDER database(https://wonder.cdc.gov/cancer-v2020.HTML). It includes cancer incidence data for the United States. These data are collected and provided by the CDC's National Program of Cancer Registries (NPCR) and the National Cancer Institute's Surveillance, Epidemiology and End Results (SEER) program. From the previous archived Cancer Statistics data, we can tell that the dataset is updated each year. The data contains 9 variables, including location, year, age group, race, sex, ethnicity, leading cancer sites, cancer sites, and childhood cancers. Also, the dataset covers years 1999 to 2020, with the 2022 data submission released in 2023. One problem with the data source is that we cannot save the data as csv file directly. Instead, we need to use the query provided by the website to select the specific columns we want and save it in a txt file. For our research purpose, we only include year from 2001 to 2011, sex, states, specific cancers(Brain, kidney and renal pelvis, larynx, lung, melanoma of the skin, and oral cancer). The dataset includes the total population, the number of people who get cancer, and the crude rate. To import the data, we need to use R to transform it to csv file. 
+```{r}
+library(readr)
+
+data <- read.table(file = 'United States Cancer Statistics, 2002-2011 Incidence.txt', 
+                   header = TRUE, 
+                   fill = TRUE, 
+                   strip.white = TRUE, 
+                   sep = "")
+data <- data[, -ncol(data)]
+names(data)[ncol(data)] <- 'Crude Rate'
+write_csv(data, 'cancer.csv')
+
+```
+
+
 ## Missing value analysis
+## From the description of the website, all missing and null values are shown as "Missing" in the dataset. Here I convert all "Missing" values to NA and show them in graph. 
+```{r}
+library(dplyr)
+
+data <- data %>%
+  mutate(across(where(is.character), ~na_if(., "Missing")))
+```
+
+```{r}
+colSums(is.na(data))
+
+rowSums(is.na(data))
+
+```
+It seems like the number of null values in the data frame is not large. Here we want to find which rows contains the null values. 
+
+```{r}
+# Get the row indices that have any NA values
+na_rows <- which(apply(is.na(data), 1, any), arr.ind=TRUE)
+selected_rows <- data[na_rows, ]
+selected_rows
+```
+From the graph we find that all values of count, population and crude rate in 2002 and Mississippi are missing. 
+
+
+```{r}
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+library(mi)
+x <- missing_data.frame(data)
+image(x)
+
+```
+```{r}
+library(redav)
+plot_missing(data, percent = FALSE)
+levels(x@patterns)
+summary(x@patterns)
+```
+From the graph we can see that only columns of count, population, and crude rate have missing values. And all missing values are from the state of Mississipi during the year of 2002. 
+
