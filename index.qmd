@@ -11,11 +11,13 @@ Why Choose This Topic:
 
 Questions we are interested in studying:
 
-1. Whether certain cancer subtypes (e.g., lung cancer, bladder cancer) show a stronger association with poor air quality? Whether certain states have higher rate of certain cancer subtypes?
+1. Whether certain cancer subtypes (e.g., lung cancer, bladder cancer) show a stronger association with poor air quality? Whether certain states have higher rate of certain cancer subtypes? What are the trends in cancer incidence and air quality over time?
 
-2. Determine if there are geographical areas in the United States with consistently poor air quality and elevated cancer rates. Are there particular pollutants associated with these areas?
+2. Determine if there are geographical areas in the United States with consistently poor air quality and elevated cancer rates. Are there particular pollutants associated with these areas? Are there any outliers in terms of cancer incidence or air quality?
 
 3. Whether there is a statistically significant correlation between long-term exposure to poor air quality (measured by pollutants like PM2.5, ozone, and VOCs) and the incidence of specific cancer types in different regions of the United States?
+
+4. Does the relationship between air quality and cancer rates change over time? Is the impact of air quality on cancer rates consistent across states?
 
 Context About the Measurement of Air Quality:
 
