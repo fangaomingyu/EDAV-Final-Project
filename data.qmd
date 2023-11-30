@@ -1,11 +1,8 @@
-# Data
-
-## Description
-
-### Data Source 1
-The first dataset we use is the United States Cancer Statistics (USCS) from the CDC's WONDER database(https://wonder.cdc.gov/cancer-v2020.HTML). It includes cancer incidence data for the United States. These data are collected and provided by the CDC's National Program of Cancer Registries (NPCR) and the National Cancer Institute's Surveillance, Epidemiology and End Results (SEER) program. From the previous archived Cancer Statistics data, we can tell that the dataset is updated each year. It encompasses a wealth of information across nine variables, such as location, year, age group, race, sex, ethnicity, leading cancer sites, specific cancer types, and childhood cancer instances. Also, the dataset covers years 1999 to 2020, with the 2022 data submission released in 2023. For our research, we focus on data from 2001 to 2011, centering on specific variables like sex, states, and certain cancers including brain, kidney and renal pelvis, larynx, lung, melanoma of the skin, and oral cancer. This selection enables us to analyze trends and patterns relevant to our study's objectives.  The dataset includes the total population, the number of people who get cancer, and the crude rate. 
-
-However, the dataset presents a challenge in its usage: it does not allow direct downloading in CSV format. Instead, we must employ the website's query feature to select desired columns and export them as a TXT file. To make this data compatible with our analytical tools, we use R to transform the file into a CSV format, facilitating efficient data manipulation and analysis. This conversion process is crucial for extracting meaningful insights from the dataset, which includes data on the total population, cancer incidence, and crude rates."
+### Data
+In this project, we aim to explore the potential correlation between air quality and cancer incidence, with the goal of informing evidence-based policies and regulations that could mitigate cancer rates through improvements in air quality. To this end, we utilize three pivotal datasets: the United States Cancer Statistics (USCS), Daily PM2.5 Concentrations All County, and Daily County-Level Ozone Concentrations. We select time interval from 2002 to 2011, and all dataset covers same states. This allows a synchronized analysis of trends and patterns in both cancer incidence and air quality across different states in the United States.
+## Technical description
+Data Source 1
+The first dataset we use is the United States Cancer Statistics (USCS) from the CDC's WONDER database(https://wonder.cdc.gov/cancer-v2020.HTML). It includes cancer incidence data for the United States. These data are collected and provided by the CDC's National Program of Cancer Registries (NPCR) and the National Cancer Institute's Surveillance, Epidemiology and End Results (SEER) program. From the previous archived Cancer Statistics data, we can tell that the dataset is updated each year. The data contains 9 variables, including location, year, age group, race, sex, ethnicity, leading cancer sites, cancer sites, and childhood cancers. Also, the dataset covers years 1999 to 2020, with the 2022 data submission released in 2023. For our research, we focus on data from 2001 to 2011, centering on specific variables like sex, states, and certain cancers including brain, kidney and renal pelvis, larynx, lung, melanoma of the skin, and oral cancer. This selection enables us to analyze trends and patterns relevant to our study's objectives. However, the dataset presents a challenge in its usage: it does not allow direct downloading in CSV format. Instead, we must employ the website's query feature to select desired columns and export them as a TXT file. To make this data compatible with our analytical tools, we use R to transform the file into a CSV format, facilitating efficient data manipulation and analysis. This conversion process is crucial for extracting meaningful insights from the dataset, which includes data on the total population, cancer incidence, and crude rates.
 
 ```{r}
 library(readr)
@@ -21,23 +18,60 @@ write_csv(data, 'cancer.csv')
 
 ```
 
+Data Source 2
+Daily PM2.5 Concentrations All County, 2001-2016
+LINK: https://data.cdc.gov/Environmental-Health-Toxicology/Daily-PM2-5-Concentrations-All-County-2001-2016/7vdq-ztk9
+This data set is collected by CDC National Environmental Public Health Tracking Network. It provides modeled predictions of PM2.5 levels from the EPA's Downscaler model. Data are at the county level for year 2001-2016. The dataset includes the maximum, median, mean, and population-weighted mean of 24-hour average PM2.5 concentration in μg/m3. This data set is in csv format. It was created on March 25, 2020 and last updated on January 21, 2021. 
+Original Data Dimension: 18.2M rows and 8 columns.
+Since this dataset is too large, I wouldn't be able to directly download and import from the Centers for Disease Control and Prevention website. Also, to compare with cancer incidence over time, it's better to let both datasets have the same time division (i.e., by year) and same geographical division(i.e., by state), it ensures consistency in the temporal granularity of the data. Thus, I will first group by year and state and aggregate on the PM25_max_pred and PM25_pop_pred columns to make the row number smaller using the query tools on the website and then import using API endpoint. 
+
+```{r}
+pm <- read.csv("https://data.cdc.gov/resource/7vdq-ztk9.csv?$query=SELECT%0A%20%20%60year%60%2C%0A%20%20%60statefips%60%2C%0A%20%20max(%60pm25_max_pred%60)%20AS%20%60max_pm25_max_pred%60%2C%0A%20%20avg(%60pm25_pop_pred%60)%20AS%20%60avg_pm25_pop_pred%60%0AGROUP%20BY%20%60year%60%2C%20%60statefips%60")
+```
+
+Data Source 3
+Daily County-Level Ozone Concentrations, 2001-2016
+LINK: https://data.cdc.gov/Environmental-Health-Toxicology/Daily-County-Level-Ozone-Concentrations-2001-2016/kmf5-t9yc
+This data set is collected by CDC National Environmental Public Health Tracking Network. Data are at the county levels for years 2001-2014. The dataset includes the maximum, median, mean, and population-weighted mean estimated 8-hour average ozone concentration in parts per billion (ppb) within 3 meters of the surface of the earth. This data set is in csv format. It was created on March 11, 2020 and last updated on May 21, 2020. 
+Original Data Dimension: 18.2M rows and 9 columns
+Since the data set is too large, I wouldn't be able to directly download and import from the Centers for Disease Control and Prevention website. For the consistency purpose mentioned above, I will first group by year and state and aggregate on 03_max_pred and O3_pop_pred columns to make the row number smaller using the query tools on the website and then import using API endpoint.
+
+```{r}
+ozone <- read.csv("https://data.cdc.gov/resource/kmf5-t9yc.csv?$query=SELECT%0A%20%20%60year2%60%2C%0A%20%20%60statefips%60%2C%0A%20%20max(%60o3_max_pred%60)%20AS%20%60max_o3_max_pred%60%2C%0A%20%20avg(%60o3_pop_pred%60)%20AS%20%60avg_o3_pop_pred%60%0AGROUP%20BY%20%60year2%60%2C%20%60statefips%60")
+```
+
+## Research plan
+To answer what geographical areas in the United States have consistently poor air quality and elevated cancer rates. We would perform time series analysis and draw time series line plot. Also, we will use box plot to get a summary of air quality data for multiple regions in a compact format. Each box plot represents a region, and the boxes display the distribution of air quality values (e.g., median, quartiles). Regions with consistently poor air quality will have lower medians and wider interquartile ranges. To double check our finding, we would use heatmap to visualize air quality data across both time and regions. Rows represent regions, columns represent time intervals, and the color scale indicates air quality levels. Consistently poor air quality regions will be represented by darker colors on the heatmap.
 
 ## Missing value analysis
-## From the description of the website, all missing and null values are shown as "Missing" in the dataset. Here I convert all "Missing" values to NA and show them in graph. 
+Load required libraries
+```{r, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+library(mi)
+library(redav)
+```
 ```{r}
 library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+library(mi)
+library(redav)
+```
 
+For the cancer dataset, from the description of the website, all missing and null values are shown as "Missing" in the dataset. Here I convert all "Missing" values to NA and show them in graph. 
+```{r}
 data <- data %>%
   mutate(across(where(is.character), ~na_if(., "Missing")))
 ```
 
 ```{r}
 colSums(is.na(data))
-
-rowSums(is.na(data))
-
 ```
-It seems like the number of null values in the data frame is not large. Here we want to find which rows contains the null values. 
+It seems like the number of null values in the cancer data frame is not large. Here we want to find which rows contains the null values. 
 
 ```{r}
 # Get the row indices that have any NA values
@@ -47,21 +81,31 @@ selected_rows
 ```
 From the graph we find that all values of count, population and crude rate in 2002 and Mississippi are missing. 
 
-
 ```{r}
-library(ggplot2)
-library(reshape2)
-library(tidyverse)
-library(mi)
 x <- missing_data.frame(data)
 image(x)
-
 ```
 ```{r}
-library(redav)
 plot_missing(data, percent = FALSE)
 levels(x@patterns)
 summary(x@patterns)
 ```
 From the graph we can see that only columns of count, population, and crude rate have missing values. And all missing values are from the state of Mississipi during the year of 2002. 
 
+For the PM2.5 Concentrations dataset:
+```{r}
+colSums(is.na (pm) ) |> sort(decreasing = TRUE)
+```
+```{r}
+plot_missing(pm, percent = FALSE)
+```
+Based on the missing pattern graph and the NA count in the dataset, there is no missing values.
+
+For the Ozone Concentrations dataset: 
+```{r}
+colSums(is.na (ozone) ) |> sort(decreasing = TRUE)
+```
+```{r}
+plot_missing(ozone, percent = FALSE)
+```
+Based on the missing pattern graph and the NA count in the dataset, there is no missing values.
