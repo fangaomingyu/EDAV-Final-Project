@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>YOUR PROJECT TITLE - 2&nbsp; Data</title>
+<title>Investigating the Relationship Between Air Quality and Cancer Incidence in the United States - 2&nbsp; Data</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -123,7 +123,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">YOUR PROJECT TITLE</a> 
+      <a href="./">Investigating the Relationship Between Air Quality and Cancer Incidence in the United States</a> 
         <div class="sidebar-tools-main">
     <a href="https://github.com/fangaomingyu/EDAV-Final-Project" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
@@ -176,9 +176,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#technical-description" id="toc-technical-description" class="nav-link active" data-scroll-target="#technical-description"><span class="header-section-number">2.1</span> Technical description</a></li>
-  <li><a href="#research-plan" id="toc-research-plan" class="nav-link" data-scroll-target="#research-plan"><span class="header-section-number">2.2</span> Research plan</a></li>
-  <li><a href="#missing-value-analysis" id="toc-missing-value-analysis" class="nav-link" data-scroll-target="#missing-value-analysis"><span class="header-section-number">2.3</span> Missing value analysis</a></li>
+  <li><a href="#research-plan" id="toc-research-plan" class="nav-link active" data-scroll-target="#research-plan"><span class="header-section-number">2.1</span> Research plan</a></li>
+  <li><a href="#missing-value-analysis" id="toc-missing-value-analysis" class="nav-link" data-scroll-target="#missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/fangaomingyu/EDAV-Final-Project/edit/main/data.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/fangaomingyu/EDAV-Final-Project/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -202,9 +201,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<section id="technical-description" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="technical-description"><span class="header-section-number">2.1</span> Technical description</h2>
-<p>Data Source 1 The first dataset we use is the United States Cancer Statistics (USCS) from the CDC’s WONDER database(https://wonder.cdc.gov/cancer-v2020.HTML). It includes cancer incidence data for the United States. These data are collected and provided by the CDC’s National Program of Cancer Registries (NPCR) and the National Cancer Institute’s Surveillance, Epidemiology and End Results (SEER) program. From the previous archived Cancer Statistics data, we can tell that the dataset is updated each year. The data contains 9 variables, including location, year, age group, race, sex, ethnicity, leading cancer sites, cancer sites, and childhood cancers. Also, the dataset covers years 1999 to 2020, with the 2022 data submission released in 2023. One problem with the data source is that we cannot save the data as csv file directly. Instead, we need to use the query provided by the website to select the specific columns we want and save it in a txt file. For our research purpose, we only include year from 2001 to 2011, sex, states, specific cancers(Brain, kidney and renal pelvis, larynx, lung, melanoma of the skin, and oral cancer). The dataset includes the total population, the number of people who get cancer, and the crude rate. To import the data, we need to use R to transform it to csv file.</p>
+<p>In this project, we aim to explore the potential correlation between air quality and cancer incidence, with the goal of informing evidence-based policies and regulations that could mitigate cancer rates through improvements in air quality. To this end, we utilize three pivotal datasets: the United States Cancer Statistics (USCS), Daily PM2.5 Concentrations All County, and Daily County-Level Ozone Concentrations. We select time interval from 2002 to 2011, and all dataset covers same states. This allows a synchronized analysis of trends and patterns in both cancer incidence and air quality across different states in the United States. ## Technical description Data Source 1 The first dataset we use is the United States Cancer Statistics (USCS) from the CDC’s WONDER database(https://wonder.cdc.gov/cancer-v2020.HTML). It includes cancer incidence data for the United States. These data are collected and provided by the CDC’s National Program of Cancer Registries (NPCR) and the National Cancer Institute’s Surveillance, Epidemiology and End Results (SEER) program. From the previous archived Cancer Statistics data, we can tell that the dataset is updated each year. The data contains 9 variables, including location, year, age group, race, sex, ethnicity, leading cancer sites, cancer sites, and childhood cancers. Also, the dataset covers years 1999 to 2020, with the 2022 data submission released in 2023. For our research, we focus on data from 2001 to 2011, centering on specific variables like sex, states, and certain cancers including brain, kidney and renal pelvis, larynx, lung, melanoma of the skin, and oral cancer. This selection enables us to analyze trends and patterns relevant to our study’s objectives. However, the dataset presents a challenge in its usage: it does not allow direct downloading in CSV format. Instead, we must employ the website’s query feature to select desired columns and export them as a TXT file. To make this data compatible with our analytical tools, we use R to transform the file into a CSV format, facilitating efficient data manipulation and analysis. This conversion process is crucial for extracting meaningful insights from the dataset, which includes data on the total population, cancer incidence, and crude rates.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -234,13 +231,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ozone <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://data.cdc.gov/resource/kmf5-t9yc.csv?$query=SELECT%0A%20%20%60year2%60%2C%0A%20%20%60statefips%60%2C%0A%20%20max(%60o3_max_pred%60)%20AS%20%60max_o3_max_pred%60%2C%0A%20%20avg(%60o3_pop_pred%60)%20AS%20%60avg_o3_pop_pred%60%0AGROUP%20BY%20%60year2%60%2C%20%60statefips%60"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<section id="research-plan" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="research-plan"><span class="header-section-number">2.1</span> Research plan</h2>
+<ol type="1">
+<li><p>To answer what geographical areas in the United States have consistently poor air quality. We would perform time series analysis and draw time series line plot. Also, we will use box plot to get a summary of air quality data for multiple regions in a compact format. Each box plot represents a region, and the boxes display the distribution of air quality values (e.g., median, quartiles). Regions with consistently poor air quality will have lower medians and wider interquartile ranges. To double check our finding, we would use heatmap to visualize air quality data across both time and regions. Rows represent regions, columns represent time intervals, and the color scale indicates air quality levels. Consistently poor air quality regions will be represented by darker colors on the heatmap.</p></li>
+<li><p>After knowing what geographical areas have poor air quality, we need to answer questions about whether certain states have a higher rate of specific cancer subtypes and then explore whether certain cancer subtypes show a stronger association with poor air quality. We will first draw bar charts to compare cancer incidence rates for different cancer subtypes across states. Each subtype can be represented by a different color, and states can be grouped along the x-axis. As we have a large dataset about cancer incidence, we will need interactive plots to provide additional insights and allow us to zoom in on specific data points. We would also draw time series line plot to explore the trend of cancer incidence and compare with the line we got for air condition.</p></li>
+<li><p>Finally to answer whether there is a statistically significant correlation between long-term exposure to poor air quality, we will first draw scatter plots can show the relationship between two continuous variables cancer incidence rates and air quality levels. And then, we will perform hypothesis testing using Pearson’s test and get a conclusion based on p-value.</p></li>
+</ol>
 </section>
-<section id="research-plan" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="research-plan"><span class="header-section-number">2.2</span> Research plan</h2>
-<p>To answer what geographical areas in the United States have consistently poor air quality and elevated cancer rates. We would perform time series analysis and draw time series line plot. Also, we will use box plot to get a summary of air quality data for multiple regions in a compact format. Each box plot represents a region, and the boxes display the distribution of air quality values (e.g., median, quartiles). Regions with consistently poor air quality will have lower medians and wider interquartile ranges. To double check our finding, we would use heatmap to visualize air quality data across both time and regions. Rows represent regions, columns represent time intervals, and the color scale indicates air quality levels. Consistently poor air quality regions will be represented by darker colors on the heatmap.</p>
-</section>
-<section id="missing-value-analysis" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.3</span> Missing value analysis</h2>
+<section id="missing-value-analysis" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</h2>
 <p>Load required libraries</p>
 <div class="cell">
 <details>
