@@ -6,7 +6,7 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Investigating the Relationship Between Air Quality and Cancer Incidence in the United States"
   author:
     - Gaomingyu Fan (gf2514)
     - Zhaoyi Yu (zy2612)
