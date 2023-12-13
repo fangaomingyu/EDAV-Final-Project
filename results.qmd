@@ -8,7 +8,8 @@ library(sf)
 library(choroplethr)
 ```
 
-
+## Time series
+### Cancer
 
 ```{r}
 cancer <- read.csv('cancer.csv')
@@ -57,7 +58,32 @@ ggplot(result_total, aes(x = Year, y = total_cancer_count)) +
 g <- ggplot(result_total, aes(x = Year, y = total_cancer_count)) + geom_point()
 g + geom_smooth(method = "loess", span = .7, se = FALSE)
 ```
+### pm2.5
+```{r}
+avg_pm_per_year <- pm %>%
+  group_by(year) %>%
+  summarise(average_pm25 = mean(avg_pm25_pop_pred))
 
+g <- ggplot(avg_pm_per_year, aes(year, average_pm25)) +
+  geom_line() +
+  ggtitle("Average Daily PM2.5 Concentrations in US, 2001-2016") +
+  xlab("2001-2016")
+g + geom_smooth(method = "loess", span = .7, se = FALSE)
+```
+
+### Ozone
+```{r}
+avg_o3_per_year <- ozone %>%
+  group_by(year2) %>%
+  summarise(average_o3 = mean(avg_o3_pop_pred))
+g <- ggplot(avg_o3_per_year, aes(year2, average_o3)) +
+  geom_line() +
+  ggtitle("Average O3 in US, 2001-2016") +
+  xlab("2001-2016")
+g + geom_smooth(method = "loess", span = .7, se = FALSE)
+```
+
+##Spatial
 
 ```{r}
 result_by_states$region <- result_by_states$States
@@ -86,3 +112,7 @@ for (year in 2002:2011) {
 }
 ```
 
+##Scatter Plot
+```{r}
+
+```
