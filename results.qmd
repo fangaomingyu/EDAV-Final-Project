@@ -1,1 +1,88 @@
 # Results
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(sf)
+library(choroplethr)
+```
+
+
+
+```{r}
+cancer <- read.csv('cancer.csv')
+#unique(cancer$Leading.Cancer.Sites)
+cancer$Count <- as.numeric(as.character(cancer$Count))
+cancer <- na.omit(cancer)
+lung_df = cancer[cancer['Leading.Cancer.Sites'] == 'Lung and Bronchus',]
+#unique(cancer['States'])
+```
+
+
+```{r}
+
+result_by_states <- lung_df %>%
+  group_by(States, Year) %>%
+  summarize(total_cancer_count = sum(Count, na.rm = TRUE))
+
+result_total <- lung_df %>%
+  group_by(Year) %>%
+  summarize(total_cancer_count = sum(Count, na.rm = TRUE))
+
+result_by_states
+#result_total
+
+```
+```{r}
+ggplot(result_by_states, aes(x = Year, y = total_cancer_count, group = States, color = States)) +
+  geom_line() +
+  labs(title = "Trend of Cancer Counts by Year and State",
+       x = "Year",
+       y = "Total Cancer Count") +
+  theme_minimal() +
+  scale_color_viridis_d()
+```
+```{r}
+ggplot(result_total, aes(x = Year, y = total_cancer_count)) +
+  geom_line() +
+  labs(title = "Trend of Cancer Counts by Year and State",
+       x = "Year",
+       y = "Total Cancer Count") +
+  theme_minimal() + 
+  geom_smooth(method = "loess", span = .7, se = FALSE)
+```
+
+```{r}
+g <- ggplot(result_total, aes(x = Year, y = total_cancer_count)) + geom_point()
+g + geom_smooth(method = "loess", span = .7, se = FALSE)
+```
+
+
+```{r}
+result_by_states$region <- result_by_states$States
+result_by_states$value <- result_by_states$total_cancer_count
+#result_by_states<-result_by_states[,c('region','value','Year')]
+result_by_states <- na.omit(result_by_states)
+result_by_states <- result_by_states %>% 
+  transmute(region = tolower(`region`), value = value, year = Year)
+
+```
+
+```{r}
+
+
+for (year in 2002:2011) {
+  # Subset data for the specific year
+  yearly_data <- result_by_states[result_by_states$year == year, ]
+  yearly_data <- yearly_data[, c('region', 'value')]
+
+  # Create and plot the choropleth map
+  map_title <- paste("State Cancer - Year", year)
+  map <- state_choropleth(yearly_data,
+                   title = map_title,
+                   legend = "Total Count")
+  print(map)
+}
+```
+
