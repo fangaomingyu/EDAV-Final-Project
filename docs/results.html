@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -61,6 +95,10 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="site_libs/parallel-coordinates-2.1.8/parcoords.css" rel="stylesheet">
+<script src="site_libs/parcoords-binding-1.0.1/parcoords.js"></script>
+<script src="site_libs/d3-5.16.0/d3.min.js"></script>
 
 
 </head>
@@ -138,7 +176,20 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#time-series-analysis" id="toc-time-series-analysis" class="nav-link active" data-scroll-target="#time-series-analysis"><span class="header-section-number">3.1</span> Time series Analysis</a>
+  <ul class="collapse">
+  <li><a href="#cancer" id="toc-cancer" class="nav-link" data-scroll-target="#cancer"><span class="header-section-number">3.1.1</span> Cancer</a></li>
+  <li><a href="#pm2.5" id="toc-pm2.5" class="nav-link" data-scroll-target="#pm2.5"><span class="header-section-number">3.1.2</span> pm2.5</a></li>
+  <li><a href="#ozone" id="toc-ozone" class="nav-link" data-scroll-target="#ozone"><span class="header-section-number">3.1.3</span> Ozone</a></li>
+  <li><a href="#pm2.5-1" id="toc-pm2.5-1" class="nav-link" data-scroll-target="#pm2.5-1"><span class="header-section-number">3.1.4</span> PM2.5</a></li>
+  <li><a href="#ozone-1" id="toc-ozone-1" class="nav-link" data-scroll-target="#ozone-1"><span class="header-section-number">3.1.5</span> Ozone</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/fangaomingyu/EDAV-Final-Project/edit/main/results.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/fangaomingyu/EDAV-Final-Project/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -160,8 +211,607 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
+<section id="time-series-analysis" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="time-series-analysis"><span class="header-section-number">3.1</span> Time series Analysis</h2>
+<p>Load required libraries</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(choroplethr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(parcoords)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Merge cancer, PM2.5, and Ozone data by year and states.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cancer <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">'cancer.csv'</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#unique(cancer$Leading.Cancer.Sites)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>cancer<span class="sc">$</span>Count <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(cancer<span class="sc">$</span>Count))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: NAs introduced by coercion</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cancer<span class="sc">$</span>Crude.Rate <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(cancer<span class="sc">$</span>Crude.Rate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: NAs introduced by coercion</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cancer <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(cancer)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>lung_df <span class="ot">=</span> cancer[cancer[<span class="st">'Leading.Cancer.Sites'</span>] <span class="sc">==</span> <span class="st">'Lung and Bronchus'</span>,]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>pm <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://data.cdc.gov/resource/7vdq-ztk9.csv?$query=SELECT%0A%20%20%60year%60%2C%0A%20%20%60statefips%60%2C%0A%20%20max(%60pm25_max_pred%60)%20AS%20%60max_pm25_max_pred%60%2C%0A%20%20avg(%60pm25_pop_pred%60)%20AS%20%60avg_pm25_pop_pred%60%0AGROUP%20BY%20%60year%60%2C%20%60statefips%60"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>ozone <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://data.cdc.gov/resource/kmf5-t9yc.csv?$query=SELECT%0A%20%20%60year2%60%2C%0A%20%20%60statefips%60%2C%0A%20%20max(%60o3_max_pred%60)%20AS%20%60max_o3_max_pred%60%2C%0A%20%20avg(%60o3_pop_pred%60)%20AS%20%60avg_o3_pop_pred%60%0AGROUP%20BY%20%60year2%60%2C%20%60statefips%60"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>pm<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(pm<span class="sc">$</span>year)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>ozone<span class="sc">$</span>year2 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(ozone<span class="sc">$</span>year2)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>pm_df <span class="ot">&lt;-</span> pm <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year <span class="sc">&gt;=</span> <span class="dv">2002</span> <span class="sc">&amp;</span> year <span class="sc">&lt;=</span> <span class="dv">2011</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>ozone_df <span class="ot">&lt;-</span> ozone <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year2 <span class="sc">&gt;=</span> <span class="dv">2002</span> <span class="sc">&amp;</span> year2 <span class="sc">&lt;=</span> <span class="dv">2011</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>pm_df <span class="ot">&lt;-</span> pm_df[,<span class="fu">c</span>(<span class="st">'year'</span>,<span class="st">'statefips'</span>,<span class="st">'avg_pm25_pop_pred'</span>)]</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>ozone_df <span class="ot">&lt;-</span> ozone_df[,<span class="fu">c</span>(<span class="st">'year2'</span>,<span class="st">'statefips'</span>,<span class="st">'avg_o3_pop_pred'</span>)]</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>cancer_df <span class="ot">&lt;-</span> lung_df[,<span class="fu">c</span>(<span class="st">'States.Code'</span>,<span class="st">'States'</span>,<span class="st">"Year"</span>,<span class="st">"Count"</span>)]</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>cancer_df <span class="ot">&lt;-</span> cancer_df <span class="sc">%&gt;%</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(States, Year) <span class="sc">%&gt;%</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total_cancer_count =</span> <span class="fu">sum</span>(Count, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>cancer_df <span class="ot">&lt;-</span> cancer_df[,<span class="fu">c</span>(<span class="st">'States.Code'</span>,<span class="st">'States'</span>,<span class="st">'Year'</span>,<span class="st">'total_cancer_count'</span>)]</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>cancer_df <span class="ot">&lt;-</span> cancer_df <span class="sc">%&gt;%</span> <span class="fu">distinct</span>()</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> cancer_df <span class="sc">%&gt;%</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(pm_df, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"States.Code"</span> <span class="ot">=</span> <span class="st">"statefips"</span>, <span class="st">"Year"</span> <span class="ot">=</span> <span class="st">"year"</span>))</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>merged_data <span class="ot">&lt;-</span> merged_data <span class="sc">%&gt;%</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(ozone_df, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"States.Code"</span> <span class="ot">=</span> <span class="st">"statefips"</span>, <span class="st">"Year"</span> <span class="ot">=</span> <span class="st">"year2"</span>))</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(merged_data, <span class="st">"merged_DATA.csv"</span>)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>merged_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 489 × 6
+   States.Code States  Year total_cancer_count avg_pm25_pop_pred avg_o3_pop_pred
+         &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt;              &lt;dbl&gt;             &lt;dbl&gt;           &lt;dbl&gt;
+ 1           1 Alaba…  2002               3627             11.9             40.8
+ 2           1 Alaba…  2003               3564             12.3             39.7
+ 3           1 Alaba…  2004               3804             12.3             39.6
+ 4           1 Alaba…  2005               3766             13.1             41.5
+ 5           1 Alaba…  2006               3829             13.0             44.0
+ 6           1 Alaba…  2007               3867             13.5             44.0
+ 7           1 Alaba…  2008               4130             11.5             40.6
+ 8           1 Alaba…  2009               4051              9.75            36.8
+ 9           1 Alaba…  2010               4037             10.6             41.2
+10           1 Alaba…  2011               4018             10.3             40.9
+# ℹ 479 more rows</code></pre>
+</div>
+</div>
+<section id="cancer" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="cancer"><span class="header-section-number">3.1.1</span> Cancer</h3>
+<p>We want to identify long-term increases or decreases in the lung and bronchus cancer incidences for each state in US. The following line plots show that lung and bronchus cancer counts is generally increasing from 2001 to 2010 for all states.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>result_by_states <span class="ot">&lt;-</span> lung_df <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(States, Year) <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total_cancer_count =</span> <span class="fu">sum</span>(Count, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'States'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>result_total <span class="ot">&lt;-</span> lung_df <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Year) <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total_cancer_count =</span> <span class="fu">sum</span>(Count, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#result_by_states</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#result_total</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(result_by_states, <span class="fu">aes</span>(<span class="at">x =</span> Year, <span class="at">y =</span> total_cancer_count, <span class="at">group =</span> States, <span class="at">color =</span> States)) <span class="sc">+</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Trend of Cancer Counts by Year and State"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Total Cancer Count"</span>) <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(result_total, <span class="fu">aes</span>(<span class="at">x =</span> Year, <span class="at">y =</span> total_cancer_count)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Trend of Cancer Counts by Year and State"</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Total Cancer Count"</span>) <span class="sc">+</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">span =</span> .<span class="dv">7</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(result_total, <span class="fu">aes</span>(<span class="at">x =</span> Year, <span class="at">y =</span> total_cancer_count)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>g <span class="sc">+</span> <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">span =</span> .<span class="dv">7</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="pm2.5" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="pm2.5"><span class="header-section-number">3.1.2</span> pm2.5</h3>
+<p>We want to identify long-term increases or decreases in daily PM2.5 concentrations from 2001 to 2016 for each state in US. The following line plots show that daily PM2.5 concentrations is generally decreasing for all states.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, <span class="fu">aes</span>(<span class="at">x =</span> Year, <span class="at">y =</span> avg_pm25_pop_pred, <span class="at">color =</span> States)) <span class="sc">+</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Trend of Daily PM2.5 Concentrations by Year and State"</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Daily PM2.5 Concentrations"</span>) <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>avg_pm_per_year <span class="ot">&lt;-</span> pm <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year) <span class="sc">%&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average_pm25 =</span> <span class="fu">mean</span>(avg_pm25_pop_pred))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(avg_pm_per_year, <span class="fu">aes</span>(year, average_pm25)) <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Average Daily PM2.5 Concentrations in US, 2001-2016"</span>) <span class="sc">+</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"2001-2016"</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>g <span class="sc">+</span> <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">span =</span> .<span class="dv">7</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="ozone" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="ozone"><span class="header-section-number">3.1.3</span> Ozone</h3>
+<p>We want to identify long-term increases or decreases in daily Ozone concentrations from 2001 to 2016 for each state in US. The following line plots show no pattern for increasing or decreasing in daily Ozone concentrations for all states. The changes of ozone concentration are subtle.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, <span class="fu">aes</span>(<span class="at">x =</span> Year, <span class="at">y =</span> avg_o3_pop_pred, <span class="at">color =</span> States)) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Trend of Daily PM2.5 Concentrations by Year and State"</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Daily Ozone Concentrations"</span>) <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>avg_o3_per_year <span class="ot">&lt;-</span> ozone <span class="sc">%&gt;%</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year2) <span class="sc">%&gt;%</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average_o3 =</span> <span class="fu">mean</span>(avg_o3_pop_pred))</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(avg_o3_per_year, <span class="fu">aes</span>(year2, average_o3)) <span class="sc">+</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Average Daily Ozone Concentration in US, 2001-2016"</span>) <span class="sc">+</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"2001-2016"</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>g <span class="sc">+</span> <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">span =</span> .<span class="dv">7</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>##Spatial Analysis</p>
+<p>###Cancer We want to identify some geographical patterns of lung and bronchus cancer incidences for each state in US. The following choropleth maps use color to indicate the value of cancer incidences within each state. Deep color indicates more cancer incidences. Top states with higher cancer incidences are the same from 2001 to 2011.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>result_by_states<span class="sc">$</span>region <span class="ot">&lt;-</span> result_by_states<span class="sc">$</span>States</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>result_by_states<span class="sc">$</span>value <span class="ot">&lt;-</span> result_by_states<span class="sc">$</span>total_cancer_count</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">#result_by_states&lt;-result_by_states[,c('region','value','Year')]</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>result_by_states <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(result_by_states)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>result_by_states <span class="ot">&lt;-</span> result_by_states <span class="sc">%&gt;%</span> </span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">region =</span> <span class="fu">tolower</span>(<span class="st">`</span><span class="at">region</span><span class="st">`</span>), <span class="at">value =</span> value, <span class="at">year =</span> Year)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#result_by_states</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> <span class="dv">2002</span><span class="sc">:</span><span class="dv">2011</span>) {</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Subset data for the specific year</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  yearly_data <span class="ot">&lt;-</span> result_by_states[result_by_states<span class="sc">$</span>year <span class="sc">==</span> year, ]</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  yearly_data <span class="ot">&lt;-</span> yearly_data[, <span class="fu">c</span>(<span class="st">'region'</span>, <span class="st">'value'</span>)]</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create and plot the choropleth map</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  map_title <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"State Cancer - Year"</span>, year)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  map <span class="ot">&lt;-</span> <span class="fu">state_choropleth</span>(yearly_data,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>                   <span class="at">title =</span> map_title,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>                   <span class="at">legend =</span> <span class="st">"Total Count"</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(map)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: mississippi</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-7.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-8.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-9.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-13-10.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="pm2.5-1" class="level3" data-number="3.1.4">
+<h3 data-number="3.1.4" class="anchored" data-anchor-id="pm2.5-1"><span class="header-section-number">3.1.4</span> PM2.5</h3>
+<p>We want to identify some geographical patterns of PM2.5 concentrations for each state in US. The following choropleth maps use color to indicate the value of population weighted averaged PM2.5 concentrations in μg/m3 for each state. Deep color indicates higher PM2.5 concentrations. Ohio and Indiana have leading PM2.5 concentrations every year from 2001 to 2011.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>spatial_pm <span class="ot">&lt;-</span> merged_data <span class="sc">%&gt;%</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">region =</span> <span class="fu">tolower</span>(States), <span class="at">value =</span> avg_pm25_pop_pred, <span class="at">year =</span> Year)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(year <span class="cf">in</span> <span class="fu">unique</span>(spatial_pm<span class="sc">$</span>year)) {</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    df_year <span class="ot">&lt;-</span> spatial_pm[spatial_pm<span class="sc">$</span>year <span class="sc">==</span> year, ]</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    df_year<span class="sc">$</span>value <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(df_year<span class="sc">$</span>value)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    map <span class="ot">&lt;-</span> <span class="fu">state_choropleth</span>(df_year, </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>                     <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Daily Average PM2.5 Concentrations All States, "</span>, year),</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>                     <span class="at">legend =</span> <span class="st">"Daily Average PM2.5"</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(map)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: mississippi, alaska, hawaii</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-7.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-8.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-9.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-14-10.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="ozone-1" class="level3" data-number="3.1.5">
+<h3 data-number="3.1.5" class="anchored" data-anchor-id="ozone-1"><span class="header-section-number">3.1.5</span> Ozone</h3>
+<p>We want to identify some geographical patterns of Ozone concentrations for each state in US. The following choropleth maps use color to indicate the value of population weighted averaged and yearly averaged 8-hour average ozone concentration in parts per billion within 3 meters of the surface of the earth for each state. Deep color indicates higher Ozone concentrations. Utah, Arizona, and New Mexico have leading PM2.5 concentrations every year from 2001 to 2011.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>spatial_o3 <span class="ot">&lt;-</span> merged_data <span class="sc">%&gt;%</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">region =</span> <span class="fu">tolower</span>(States), <span class="at">value =</span> avg_o3_pop_pred, <span class="at">year =</span> Year)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(year <span class="cf">in</span> <span class="fu">unique</span>(spatial_o3<span class="sc">$</span>year)) {</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    df_year <span class="ot">&lt;-</span> spatial_o3[spatial_o3<span class="sc">$</span>year <span class="sc">==</span> year, ]</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    df_year<span class="sc">$</span>value <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(df_year<span class="sc">$</span>value)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    map <span class="ot">&lt;-</span> <span class="fu">state_choropleth</span>(df_year, </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>                     <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Daily Ozone Concentrations All States, "</span>, year),</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>                     <span class="at">legend =</span> <span class="st">"Daily Average PM2.5"</span>)</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(map)</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: mississippi, alaska, hawaii</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-7.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-8.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in self$bind(): The following regions were missing and are being set to
+NA: alaska, hawaii</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-9.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-15-10.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>##Correlations between lung and bronchus cancer rates and PM2.5/Ozone concentrations</p>
+<p>To explore the correlations or how one variable changes with respect to the other between lung and bronchus cancer rates and PM2.5/Ozone concentrations, we used scatter plot, pearson test, and interactive parallel coordinate plot. The following line of best fit in scatter plot shows that lung and bronchus cancer rates and PM2.5 are positively correlated, for points with higher PM2.5 concentration, it also has higher cancer rate.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, <span class="fu">aes</span>(<span class="at">x =</span> avg_pm25_pop_pred, <span class="at">y =</span> total_cancer_count)) <span class="sc">+</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Scatter Plot of Cancer Counts vs PM2.5"</span>, <span class="at">x =</span> <span class="st">"Average PM2.5"</span>,  <span class="at">y =</span> <span class="st">"Total Cancer Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The following line of best fit in scatter plot gives no correlation between lung and bronchus cancer rates and ozone concentration, for points with high ozone concentration, lung and bronchus cancer rate can be both high or low.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, <span class="fu">aes</span>(<span class="at">x =</span> avg_pm25_pop_pred, <span class="at">y =</span> total_cancer_count)) <span class="sc">+</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Scatter Plot of Cancer Counts vs Ozone"</span>, </span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Average Daily Ozone Concentration"</span>,  </span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Total Cancer Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, <span class="fu">aes</span>(avg_pm25_pop_pred, <span class="at">y =</span> total_cancer_count)) <span class="sc">+</span> </span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hex</span>(<span class="at">bins=</span><span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"grey"</span>, <span class="at">high =</span> <span class="st">"purple"</span>) <span class="sc">+</span>  </span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="dv">18</span>) <span class="sc">+</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Heatmap of Cancer Counts vs PM2.5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(merged_data, <span class="fu">aes</span>(avg_o3_pop_pred, <span class="at">y =</span> total_cancer_count)) <span class="sc">+</span> </span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hex</span>(<span class="at">bins=</span><span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(<span class="at">low =</span> <span class="st">"grey"</span>, <span class="at">high =</span> <span class="st">"purple"</span>) <span class="sc">+</span>  </span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="dv">18</span>) <span class="sc">+</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Scatter Plot of Cancer Counts vs Ozone"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The Pearson correlation test provides a coefficient (r) that quantifies the strength and direction of the linear relationship between two continuous variables. For value close to 0, like -0.04076092 for cancer rates and ozone concentration, it implies no linear correlation. For value close to 1, it indicates positive linear correlation.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>correlation_test_pearson <span class="ot">&lt;-</span> <span class="fu">cor.test</span>(merged_data<span class="sc">$</span>total_cancer_count, merged_data<span class="sc">$</span>avg_pm25_pop_pred, <span class="at">method =</span> <span class="st">"pearson"</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(correlation_test_pearson)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  merged_data$total_cancer_count and merged_data$avg_pm25_pop_pred
+t = 6.2149, df = 487, p-value = 1.104e-09
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.1868981 0.3513058
+sample estimates:
+      cor 
+0.2710779 </code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>correlation_test_pearson <span class="ot">&lt;-</span> <span class="fu">cor.test</span>(merged_data<span class="sc">$</span>total_cancer_count, merged_data<span class="sc">$</span>avg_o3_pop_pred, <span class="at">method =</span> <span class="st">"pearson"</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(correlation_test_pearson)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  merged_data$total_cancer_count and merged_data$avg_o3_pop_pred
+t = -0.90026, df = 487, p-value = 0.3684
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.12896706  0.04808514
+sample estimates:
+        cor 
+-0.04076092 </code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>merged_data <span class="sc">%&gt;%</span> </span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(<span class="st">"States"</span>,<span class="st">"total_cancer_count"</span>,<span class="st">"avg_pm25_pop_pred"</span>,<span class="st">"avg_o3_pop_pred"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(merged_data) <span class="sc">%&gt;%</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">parcoords</span>(<span class="at">rownames =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">brushMode =</span> <span class="st">"1D-axes"</span>,</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> <span class="fu">list</span>(<span class="at">colorBy =</span> <span class="st">"Region"</span>,</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colorScale =</span> <span class="st">"scaleOrdinal"</span>,</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colorScheme =</span> <span class="st">"schemeCategory10"</span>),</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">alpha =</span> <span class="fl">0.5</span>,</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">withD3 =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">width =</span> <span class="dv">770</span>,</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">height =</span> <span class="dv">600</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="parcoords html-widget " height="506px" id="htmlwidget-f8c7759a53119f0cb42c" style="width:100%;height:506px; position:relative; overflow-x:auto; overflow-y:hidden; max-width:100%;" width="100%"></div>
+<script type="application/json" data-for="htmlwidget-f8c7759a53119f0cb42c">{"x":{"data":{"names":["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130","131","132","133","134","135","136","137","138","139","140","141","142","143","144","145","146","147","148","149","150","151","152","153","154","155","156","157","158","159","160","161","162","163","164","165","166","167","168","169","170","171","172","173","174","175","176","177","178","179","180","181","182","183","184","185","186","187","188","189","190","191","192","193","194","195","196","197","198","199","200","201","202","203","204","205","206","207","208","209","210","211","212","213","214","215","216","217","218","219","220","221","222","223","224","225","226","227","228","229","230","231","232","233","234","235","236","237","238","239","240","241","242","243","244","245","246","247","248","249","250","251","252","253","254","255","256","257","258","259","260","261","262","263","264","265","266","267","268","269","270","271","272","273","274","275","276","277","278","279","280","281","282","283","284","285","286","287","288","289","290","291","292","293","294","295","296","297","298","299","300","301","302","303","304","305","306","307","308","309","310","311","312","313","314","315","316","317","318","319","320","321","322","323","324","325","326","327","328","329","330","331","332","333","334","335","336","337","338","339","340","341","342","343","344","345","346","347","348","349","350","351","352","353","354","355","356","357","358","359","360","361","362","363","364","365","366","367","368","369","370","371","372","373","374","375","376","377","378","379","380","381","382","383","384","385","386","387","388","389","390","391","392","393","394","395","396","397","398","399","400","401","402","403","404","405","406","407","408","409","410","411","412","413","414","415","416","417","418","419","420","421","422","423","424","425","426","427","428","429","430","431","432","433","434","435","436","437","438","439","440","441","442","443","444","445","446","447","448","449","450","451","452","453","454","455","456","457","458","459","460","461","462","463","464","465","466","467","468","469","470","471","472","473","474","475","476","477","478","479","480","481","482","483","484","485","486","487","488","489"],"States":["Alabama","Alabama","Alabama","Alabama","Alabama","Alabama","Alabama","Alabama","Alabama","Alabama","Arizona","Arizona","Arizona","Arizona","Arizona","Arizona","Arizona","Arizona","Arizona","Arizona","Arkansas","Arkansas","Arkansas","Arkansas","Arkansas","Arkansas","Arkansas","Arkansas","Arkansas","Arkansas","California","California","California","California","California","California","California","California","California","California","Colorado","Colorado","Colorado","Colorado","Colorado","Colorado","Colorado","Colorado","Colorado","Colorado","Connecticut","Connecticut","Connecticut","Connecticut","Connecticut","Connecticut","Connecticut","Connecticut","Connecticut","Connecticut","Delaware","Delaware","Delaware","Delaware","Delaware","Delaware","Delaware","Delaware","Delaware","Delaware","District of Columbia","District of Columbia","District of Columbia","District of Columbia","District of Columbia","District of Columbia","District of Columbia","District of Columbia","District of Columbia","District of Columbia","Florida","Florida","Florida","Florida","Florida","Florida","Florida","Florida","Florida","Florida","Georgia","Georgia","Georgia","Georgia","Georgia","Georgia","Georgia","Georgia","Georgia","Georgia","Idaho","Idaho","Idaho","Idaho","Idaho","Idaho","Idaho","Idaho","Idaho","Idaho","Illinois","Illinois","Illinois","Illinois","Illinois","Illinois","Illinois","Illinois","Illinois","Illinois","Indiana","Indiana","Indiana","Indiana","Indiana","Indiana","Indiana","Indiana","Indiana","Indiana","Iowa","Iowa","Iowa","Iowa","Iowa","Iowa","Iowa","Iowa","Iowa","Iowa","Kansas","Kansas","Kansas","Kansas","Kansas","Kansas","Kansas","Kansas","Kansas","Kansas","Kentucky","Kentucky","Kentucky","Kentucky","Kentucky","Kentucky","Kentucky","Kentucky","Kentucky","Kentucky","Louisiana","Louisiana","Louisiana","Louisiana","Louisiana","Louisiana","Louisiana","Louisiana","Louisiana","Louisiana","Maine","Maine","Maine","Maine","Maine","Maine","Maine","Maine","Maine","Maine","Maryland","Maryland","Maryland","Maryland","Maryland","Maryland","Maryland","Maryland","Maryland","Maryland","Massachusetts","Massachusetts","Massachusetts","Massachusetts","Massachusetts","Massachusetts","Massachusetts","Massachusetts","Massachusetts","Massachusetts","Michigan","Michigan","Michigan","Michigan","Michigan","Michigan","Michigan","Michigan","Michigan","Michigan","Minnesota","Minnesota","Minnesota","Minnesota","Minnesota","Minnesota","Minnesota","Minnesota","Minnesota","Minnesota","Mississippi","Mississippi","Mississippi","Mississippi","Mississippi","Mississippi","Mississippi","Mississippi","Mississippi","Missouri","Missouri","Missouri","Missouri","Missouri","Missouri","Missouri","Missouri","Missouri","Missouri","Montana","Montana","Montana","Montana","Montana","Montana","Montana","Montana","Montana","Montana","Nebraska","Nebraska","Nebraska","Nebraska","Nebraska","Nebraska","Nebraska","Nebraska","Nebraska","Nebraska","Nevada","Nevada","Nevada","Nevada","Nevada","Nevada","Nevada","Nevada","Nevada","Nevada","New Hampshire","New Hampshire","New Hampshire","New Hampshire","New Hampshire","New Hampshire","New Hampshire","New Hampshire","New Hampshire","New Hampshire","New Jersey","New Jersey","New Jersey","New Jersey","New Jersey","New Jersey","New Jersey","New Jersey","New Jersey","New Jersey","New Mexico","New Mexico","New Mexico","New Mexico","New Mexico","New Mexico","New Mexico","New Mexico","New Mexico","New Mexico","New York","New York","New York","New York","New York","New York","New York","New York","New York","New York","North Carolina","North Carolina","North Carolina","North Carolina","North Carolina","North Carolina","North Carolina","North Carolina","North Carolina","North Carolina","North Dakota","North Dakota","North Dakota","North Dakota","North Dakota","North Dakota","North Dakota","North Dakota","North Dakota","North Dakota","Ohio","Ohio","Ohio","Ohio","Ohio","Ohio","Ohio","Ohio","Ohio","Ohio","Oklahoma","Oklahoma","Oklahoma","Oklahoma","Oklahoma","Oklahoma","Oklahoma","Oklahoma","Oklahoma","Oklahoma","Oregon","Oregon","Oregon","Oregon","Oregon","Oregon","Oregon","Oregon","Oregon","Oregon","Pennsylvania","Pennsylvania","Pennsylvania","Pennsylvania","Pennsylvania","Pennsylvania","Pennsylvania","Pennsylvania","Pennsylvania","Pennsylvania","Rhode Island","Rhode Island","Rhode Island","Rhode Island","Rhode Island","Rhode Island","Rhode Island","Rhode Island","Rhode Island","Rhode Island","South Carolina","South Carolina","South Carolina","South Carolina","South Carolina","South Carolina","South Carolina","South Carolina","South Carolina","South Carolina","South Dakota","South Dakota","South Dakota","South Dakota","South Dakota","South Dakota","South Dakota","South Dakota","South Dakota","South Dakota","Tennessee","Tennessee","Tennessee","Tennessee","Tennessee","Tennessee","Tennessee","Tennessee","Tennessee","Tennessee","Texas","Texas","Texas","Texas","Texas","Texas","Texas","Texas","Texas","Texas","Utah","Utah","Utah","Utah","Utah","Utah","Utah","Utah","Utah","Utah","Vermont","Vermont","Vermont","Vermont","Vermont","Vermont","Vermont","Vermont","Vermont","Vermont","Virginia","Virginia","Virginia","Virginia","Virginia","Virginia","Virginia","Virginia","Virginia","Virginia","Washington","Washington","Washington","Washington","Washington","Washington","Washington","Washington","Washington","Washington","West Virginia","West Virginia","West Virginia","West Virginia","West Virginia","West Virginia","West Virginia","West Virginia","West Virginia","West Virginia","Wisconsin","Wisconsin","Wisconsin","Wisconsin","Wisconsin","Wisconsin","Wisconsin","Wisconsin","Wisconsin","Wisconsin","Wyoming","Wyoming","Wyoming","Wyoming","Wyoming","Wyoming","Wyoming","Wyoming","Wyoming","Wyoming"],"total_cancer_count":[3627,3564,3804,3766,3829,3867,4130,4051,4037,4018,3252,3440,3455,3585,3533,3641,3646,3891,3695,3865,2454,2472,2525,2610,2498,2705,2688,2574,2631,2697,17473,17397,17438,17563,17606,17458,17335,18063,17333,16737,2066,2041,2001,1995,2032,2203,2284,2251,2200,2221,2627,2666,2580,2621,2715,2693,2713,2669,2659,2651,622,738,732,783,814,746,773,747,741,820,378,377,341,349,352,328,328,359,349,332,16058,16133,16532,16656,16461,16401,16798,16853,16831,16591,5515,5542,5500,5651,5877,6149,6239,6327,6084,6299,683,762,775,818,797,823,849,815,838,861,9041,9090,8881,9054,9281,9366,9401,9617,9301,9389,5078,5191,5013,5170,5379,5338,5444,5396,5313,5425,2228,2346,2284,2421,2387,2416,2443,2473,2404,2367,1728,1833,1782,1908,1894,1929,1927,1941,1865,1920,4302,4297,4466,4461,4592,4612,4803,4752,4914,4754,3315,3511,3582,3417,3419,3451,3514,3485,3504,3442,1184,1224,1272,1265,1279,1290,1283,1345,1296,1232,3613,3836,3729,3758,3785,3786,3862,3709,3672,3723,4936,4873,4959,5185,5073,5070,5183,5198,4961,5032,7401,7989,7678,7875,7887,8146,7863,7783,8097,7961,2821,2924,2910,2921,2902,3059,3076,3183,3223,3141,2314,2336,2272,2361,2522,2612,2495,2472,2452,4871,5071,4982,5253,5231,5092,5162,5378,5215,5313,668,676,655,745,718,749,710,724,695,742,1134,1173,1240,1199,1203,1291,1214,1155,1227,1177,1640,1681,1727,1636,1787,1742,1807,1729,1677,1752,891,913,987,1034,983,1000,1034,1038,1081,1098,6074,6011,5786,6127,6141,6162,6168,6043,5800,6015,904,855,903,957,940,983,970,966,964,981,13025,13015,13125,13190,13350,13543,13752,13709,13495,13822,5999,6244,6610,6980,7098,7205,7322,7522,7557,7512,420,446,421,458,404,408,402,420,440,483,9232,9180,9457,9559,9655,9569,9756,10002,9767,9827,3132,3054,3057,3123,3196,3225,3271,3019,2946,3084,2584,2542,2639,2717,2689,2645,2767,2740,2618,2791,10479,10411,10332,10696,10645,10854,10759,10839,10659,10768,906,878,905,873,857,936,942,922,854,851,3163,3266,3207,3456,3478,3608,3596,3750,3707,3726,516,519,523,527,546,559,556,546,583,557,4309,4710,5161,5315,5410,5296,5468,5684,5634,5596,12575,12898,12789,13144,12926,13257,13448,12931,13056,12853,486,546,511,561,572,551,513,627,583,659,391,463,441,478,570,522,497,532,546,528,4414,5014,5086,5227,5156,5080,5355,5447,5282,5180,3900,4070,4053,4128,4179,3974,4218,4344,4432,4320,1996,1908,1985,2132,2100,2034,2140,2048,1953,2045,3555,3659,3695,3710,3832,3818,3944,3848,4082,4129,259,295,276,291,272,272,301,306,304,285],"avg_pm25_pop_pred":[11.89255344175544,12.27185101868867,12.34171145351601,13.06987635752347,12.9576381841873,13.496187961314,11.51327914282731,9.747791066639552,10.6008218179978,10.34353020891238,7.716989208618823,8.121436027465343,7.001717671126669,7.105512700817196,6.877139479556631,5.701830007745933,6.54009284262262,6.806848950929413,6.034950764612753,6.524433525176637,11.21981243356774,11.45488894319393,10.99480973383025,12.65054705031869,11.38722386364609,11.81118331444956,10.87847337381681,9.726945054683856,10.72394757195516,10.26891819193208,12.5655094028893,11.33197063880664,10.66023573650466,10.2675371616289,10.59242937966393,9.264149119996157,11.11709891290989,9.311700706842677,7.776988901089846,8.460814444771071,6.263274859800884,6.229174940204238,6.175595513998363,5.948899304877028,6.001600086371194,5.673480578102186,5.731865975276765,6.154723228442607,5.712610731551092,5.561388825698832,12.08217605263868,11.72582096706948,11.27740255954241,11.60430373347982,10.44190422695717,10.54076450844605,9.990142784198914,8.584281283043531,8.028381580068359,8.957574501520137,13.21613349400397,13.52345136249055,13.04025088417478,13.30769994984608,12.96840830718102,12.79428705228802,12.26283296001279,10.05090441646979,9.921134095125558,9.339370398712823,14.95676328024267,14.30414508638357,14.78986868639557,14.84707209850255,13.67619241739758,13.68240362451142,12.29166219435089,10.47682178711792,10.85604924000394,10.43187898936557,9.071037141937719,9.219168086825064,9.573381246925955,9.80617884652138,9.468902014657655,9.550974948589269,8.195130957605892,7.62484360140525,8.111043243352144,7.881120701930713,12.33235454770746,12.04581857173337,12.7685767844917,13.30504514798901,12.8616434040524,13.7234051871566,11.63795370050233,10.3257579419646,11.11064153714387,10.9130235495072,8.311752777989586,6.735083988033188,8.302720707067126,8.783800790528122,8.378649299160923,7.482969021710877,7.27543269135213,7.421462059598609,6.794315102366459,6.625552362808309,13.21011568708764,13.56322952699878,11.87301731534955,13.61225389097069,12.17290124528035,13.02241857803387,11.79289502357053,10.80135763417952,11.32547846836655,10.48566944532951,14.93705001221538,14.57437412456766,13.28434897217624,15.23466641050922,13.35447015346555,14.1267869891897,12.4468867071103,11.64693210820194,12.24217709605846,11.00507342065922,10.18305582640745,10.99500878163123,9.863651866365521,11.0457492301167,9.798821557951786,11.12666758823229,10.17142670002183,9.741318665022789,10.03682257825938,9.477569145864361,9.459795243846026,9.899883709042617,9.475449577562056,10.07715811400082,9.03674864829711,9.900704258939834,8.916398689178406,8.458446067899198,8.31889873376009,8.488780210973971,13.20633150806484,12.9191351136997,12.39626277274804,13.79875406292608,12.84151364788323,13.66552418021709,11.83450718463246,10.66805864031085,11.52364837379356,10.160121363416,10.01772683716446,10.96236635742533,10.66978506730194,11.56878058903571,11.4482499659251,10.89425908467103,10.14298592006552,8.875572583932538,9.588734969127694,9.291693530711035,8.826820740888879,8.024425863578857,8.398819034787529,8.676209578333431,8.173189422609724,7.721507807181753,7.570676133925354,7.200901233745705,6.470840184431673,7.252261790221461,13.33722284593382,13.31037958155825,13.40823677798698,13.5725491631224,12.78859777005871,12.75264434904824,11.89543040382524,9.959940132592129,10.11823295714903,9.432130159021167,10.92859716977366,10.84662946962844,10.41230183870718,10.9159931382019,9.790237640616835,9.900666433401632,9.287448935402896,8.417913228460577,7.9783134447965,8.603281232664578,10.4598820189049,10.10424982032807,9.69152547234884,10.7683295751838,9.767304536027115,9.766807510480586,9.390766786845195,8.752305731412685,8.213316458726606,8.461337745895165,8.733679864625847,9.36834518685807,9.076553877132788,9.677789905217667,8.886483586675824,9.353359385563508,9.153970125245351,9.024225083465439,8.656109073586267,8.54946837682319,11.45024268858331,11.06529743992649,12.10685534217988,11.58003101617259,11.56899121945479,10.59987223455952,9.135399949168605,9.891686760592339,9.519861907463618,11.55663280913712,11.46580054357513,10.44112471497229,12.23054330171094,10.62399329951426,11.43130907947353,10.47058304782224,9.606842631496237,10.14757910181746,9.789088120393025,6.522429151031925,7.501913449498501,6.630607258875859,6.813247333856259,7.080343235071098,6.84049618099634,6.195058377889533,6.820339556814702,6.482314453536293,5.954294392806595,7.907890590646944,8.648648591813235,8.300406965885704,8.540487634463718,8.00242981018201,8.463927860239064,8.023261352071318,8.018911753611416,7.874510782634539,7.707548711849554,7.788875644503933,7.051262953262151,7.280463889306707,7.330848313685325,6.989747222223675,5.535251397540289,7.017081243969337,6.6555713193488,5.73581127580009,6.276570450584017,9.626420956745077,8.47290866860204,9.024518607949593,9.578740169365624,8.567565827214036,8.70741659475663,8.388486578602919,7.759574387898028,7.294847465183103,7.853522842055615,12.8626802531724,13.21456332549813,12.35661956048577,12.83252755846029,12.0073415120683,12.1561099568036,11.34663112703553,9.524222151540798,9.231474271176159,9.768530796590239,6.331680907018867,6.701728765326253,6.252590095827929,6.093515638915861,6.140239717371628,5.489133268411142,5.807210866381659,6.365744174554417,5.630410151601954,6.480210672945235,11.45508956806478,11.2061510013602,10.47992020320242,11.55329550194971,9.744316783108973,10.13613523446076,9.556454022252154,8.362017625095609,8.146732920185036,8.548690419809004,12.04478549282691,11.94002987712705,12.14236420488171,12.2975516487777,12.24974399034017,12.29636810629079,11.18247333637745,9.171559917401261,9.926302743227431,9.44045988221303,6.949590588999747,7.259506474486446,7.492988691170162,7.223508206893577,7.287745004149586,7.199805975074689,7.3668242861057,7.705164634889761,7.422641906652212,6.914657252811365,15.12106443276,13.60287588304053,13.73089878613583,14.93616839096534,13.30935841828495,14.30323219474316,12.53690350629108,11.7561362657499,12.13379616717873,11.10471252489776,9.820163048217076,9.801148959025429,9.525579417710544,10.31022113603807,9.261763115813917,10.34315103795302,9.487929974549054,8.885069199840855,8.890332947897603,9.275970690351754,8.563089536033388,8.139183295480013,8.809116347254399,8.833334195625033,8.102212044890903,7.348243880337807,7.411658093365417,7.755193072090022,5.92387132360498,7.060345578894546,13.43321187795267,13.0550786599784,12.97534457981688,13.56450381304285,12.02389457478922,12.64505181613245,11.51766894221113,9.982856645471573,9.809247131439937,9.842202292224426,10.42704012534375,10.93949950539837,10.13483673439204,10.24235417306291,9.566521289298016,9.318686348161785,9.242781962755076,8.225823720154366,7.779593687708281,8.410044182973646,12.18056111916192,12.41488767350384,12.7374847300634,13.19667127075025,12.85231537230331,12.84280168821227,11.4655234574896,9.786120291926334,10.53974367124769,10.30533871874119,7.175417804625774,8.029287030039601,7.96169228913252,7.837543504629903,7.717974483335502,7.852463954092413,7.598664377479303,7.830958966109388,7.608066042315305,7.123224943919916,12.48083691744753,12.65446039946088,12.12519028565878,13.22016646749495,12.70787569419889,13.27469082729031,11.42674296894695,9.764097678086637,10.82071273101981,9.952337412437261,8.504730560923193,8.448345846351327,8.576723737717927,9.060881238033641,8.551945325654813,8.847935020955509,8.441841006934704,8.120211603431629,7.926520519021071,8.397995657260822,8.518724243109444,7.287998251360698,9.280739703588646,8.315308422616281,7.497345104458367,6.76304818210578,6.926144573076749,7.704556046775189,6.948318701970617,6.507350399694388,9.327960371196927,8.768271907486303,8.548335365120645,9.292013785994248,8.071024142448628,8.30727314966683,8.270697568314217,7.669564323856601,7.23447180361705,7.709955367991663,12.10867317024152,11.95678777471747,12.13995421409272,12.46853193380777,12.04079622259817,12.32525868376685,10.93946393270317,9.200541360682493,9.743856535102667,9.034903933158013,8.741373706144197,8.069872673852181,8.805530613461951,8.723465776572352,8.542605219919951,7.17867498278465,7.272435933944923,8.059470384794848,6.413161961720494,6.618103175292569,12.57816307828442,11.78970847662069,12.15781715281708,12.90185682387782,12.22503804643513,13.51291918070192,11.63748279744782,10.45076097119117,11.02992862024764,9.859343529724347,9.895783588010863,9.974943236362991,9.509319949645798,10.31218462522617,9.743835758364165,10.43559565812468,10.26161161256891,9.631692996788459,8.872468760632893,8.993892148371485,6.467844284305308,6.734364453089512,6.648159064603034,6.298201846356411,6.389118144798096,6.004137686229472,6.160458399161657,6.277469806579699,5.971582559868302,5.932740770467902],"avg_o3_pop_pred":[40.76528267714342,39.73227006334124,39.58850655181426,41.45400387167447,44.00341517080933,43.97835133154664,40.57686983186368,36.7572554652526,41.16920103395915,40.92366272616249,48.16728954645119,47.62235607740465,45.75325939570246,46.28114267217477,47.06199588801582,47.08353428723469,47.61319831457045,45.77033328520293,46.30931873918747,47.54624602547215,41.09621881484282,41.52411743924008,39.32861331891283,43.73900068032475,44.26646737028543,42.02292533979256,40.06698950315047,38.4739729210757,42.00172850698181,40.56699782938279,42.64606590087195,41.75666405179438,40.87460136074363,39.74064823612887,41.82145184883552,41.05244841203262,42.42680885208306,39.6878297054978,39.2061391230836,39.86983602497622,43.67369920214134,44.24770180473527,42.97650576866698,44.40745029058336,45.29089346034536,46.29179770728078,46.80449960160835,44.21897681659897,46.28835009161941,47.54878165102036,41.4114812234945,39.19313351946743,37.44968864040121,40.58925144909752,39.52126020500206,40.41859029238307,39.17278837121323,36.44645982621233,39.58219995556298,38.16932924847295,42.92137986723849,40.76490106573508,39.94102748917922,41.3060647768525,41.88902202648661,42.4918052473766,41.75108736745858,39.06494185533737,43.77073389903347,41.09250062572972,39.90473918117473,34.8629351455132,35.38039997522463,36.8451765167952,39.12802419921861,40.52321338300272,38.15640455316704,35.88721751333665,41.94277152425889,39.65491356251459,38.95626923347993,38.42061125681062,40.14337339212282,40.35505535274805,42.96807473131926,41.58223722379745,39.02932197707572,37.41877920019117,39.50565967529013,39.3924444744675,41.74348232390581,39.9948443386547,41.31211720651129,41.97387168393978,44.64150758081269,44.78199601846762,42.32287818699745,38.18085918146026,41.91925206608031,42.74640793534638,42.54994514834434,42.54397361176408,40.8921440248216,39.96331269456366,40.15053192899032,43.23528421000021,42.30053319030409,40.77924367156155,41.2143911519538,42.00139513957232,39.5336236521869,39.19457428355975,36.7849149286976,40.20275923715716,37.59653950182561,40.05967192589208,37.35528277883972,36.39676484229913,39.67780515325875,39.54902079319031,41.89251769492159,40.04270997542798,38.06800600994123,40.87755818606894,38.9291841661294,41.63715766237743,39.1186902950292,36.76754678684222,39.74811601069935,39.05815509618912,37.74116578244177,37.84555403035684,35.78665200710186,38.33141987732351,37.52626146356623,37.69874575503069,36.28234152767549,35.56076737976991,37.72608198039813,38.02397355658895,39.75955493174273,40.03513363766758,39.82709676837435,42.37268324776557,43.33862505059422,40.73820740381903,40.18545660703526,39.61247717986053,41.6182864840729,44.09020179913814,41.87010288976813,40.53955955809985,38.68731995331154,41.99358145651767,41.04637933499949,44.6028884923415,42.1832594174157,38.12568100824458,42.67219208758247,41.62794376564382,39.62386129381549,41.65902725372839,40.57403630172126,44.43515322728089,44.24279815295618,40.99885419882789,39.14506150788858,38.06358299996848,41.93248526240404,41.33602616798427,37.14309208623182,37.00171030196986,35.3368046948535,35.28671934636814,34.76764377052636,36.25505367824764,35.94384102213895,34.30145816590176,35.40129751097493,35.11196285708964,43.34600276052294,40.30133192697859,39.76878585408829,40.97477281734179,41.77446506456756,42.78791552101909,41.07834405377092,38.84481480170948,44.06823956782878,41.72951984026255,40.6026840170274,39.67793332624154,38.03184493969041,40.05597111348838,38.6157507783804,39.34425453910305,39.13450209977493,36.84899823484201,39.01340331333301,37.86069948399733,38.87220811269278,38.86461971218006,36.66970209071008,39.30809816883288,36.97231971919724,38.82092408008801,37.35010313877626,35.24259875241972,38.41431126343066,37.93227796273932,36.28543391035458,37.95739193051162,35.15822380810392,37.52887674617059,36.91394102877651,36.6155880358937,36.13981801657131,34.91020947877563,36.81687166839483,36.69928884271953,41.27321762474506,39.91073921316895,43.38994933301625,44.46188187429917,42.02609270428736,39.61059456520532,37.45590189635137,40.91699900347722,40.8908764258515,41.38876271260713,41.49169282458498,38.35624066352661,42.08519620735524,41.88228224683301,41.65241747660263,39.10451634817223,38.13355029469031,40.56995586077618,41.23094196623646,38.83524562212155,39.87743249486346,37.90434337638231,38.84339154551238,39.7983163918792,40.48277230332442,40.23891853348,38.65660933856602,38.37285083831478,39.77915819477489,39.45258302263285,39.28662508623448,38.73783100059371,40.48742429969189,40.55727615934566,39.34702609379491,38.49347054482084,36.63019634690338,38.6291273882054,39.79710475719229,45.20635765715661,44.60159143168934,43.95894065770111,43.65998951348273,45.17939360752756,44.98790686890438,44.38532013047045,43.00246892275769,43.94775087695018,43.91716735275642,38.92650113722755,38.66638481715321,37.1977341484376,37.87214456473384,35.95894416674657,38.09083619747705,37.26392875723537,35.43209632950478,38.11076501377597,36.65832599531978,41.50844304352625,38.38394470990013,37.34669602632606,39.35397426071021,39.35712463648611,39.43845470680152,38.81411500461316,36.20782695719706,40.99531190030412,38.53241061483524,45.54471832032724,46.40109561899084,44.44280157915524,45.1464549716607,45.53455705060723,45.76301989846193,45.2993964957066,43.43332678381486,44.68320427260826,46.6829362767577,40.48982473394502,38.7320092431364,36.56340339038884,39.07377711784377,37.22295411366415,38.82956305845697,37.8406202425261,36.23168721508553,38.77679915750291,37.06241296240978,45.42338944869267,42.80551719594644,41.35022443723874,43.88547641180735,44.32301956328855,46.2620630053303,43.88829656112627,39.56316591926124,43.98255837923529,43.38273396329639,36.68045919559452,37.83943602487341,34.95865001612798,36.39502825558082,37.4668260871951,36.05732868698757,37.01822185837646,35.19505791607211,36.85091708682297,37.06620030303047,42.4431860891133,39.85465933910889,38.09874147508008,40.70863240319833,39.57122451246888,41.5228931126515,40.45648005038667,38.15685840844135,41.16586084505004,39.73640619390549,42.46117487566789,43.83388122415391,40.95950535457327,44.14134558940624,45.82718445960371,41.54202152300493,42.50133188870769,41.28469594580051,41.98151074765804,46.72283862896681,35.98707232850603,37.86073022247594,35.52780618036002,35.5523402095324,37.68319402655727,36.18262230813745,35.93090640456822,35.68166906269396,35.0475363568187,35.08626949797767,42.03635709804548,38.86746978089545,38.17394473700839,40.84376312131745,38.99563428605844,40.61282120916223,39.38205663662588,37.14743703678231,41.60838649165277,38.70122250742303,41.15364001418711,40.10561286229527,38.64831748833568,40.02454251744837,39.54644184559359,40.30824007889673,40.01065069174763,37.07556420359176,39.57142916686387,39.22991420927658,43.30387365058928,40.23760174434235,40.99099107662002,42.10153219600473,43.80977330899123,44.81509422639374,42.70613961020051,37.72380278992834,41.68628032943161,42.16108095511746,39.32886435214749,39.53460498506489,37.6129350704007,39.5547425293062,39.45923147149752,38.1909189568571,38.04173631839869,35.95421941929852,37.80474014690508,38.48193993643384,44.06816821533625,43.0444457293638,41.48658514812351,44.42002112479957,44.49809923588238,47.27783235195629,43.55636881408501,39.42165964236424,43.97103374952383,43.231119377158,41.95519660710826,42.95609310727783,40.69748100276671,43.41511120534832,43.74527734518824,40.48255470267292,41.7576858780052,40.29272465375092,40.57978146269738,44.21372492644442,47.30411151272234,47.77980388553511,46.30615143944496,47.1855217395396,46.92960268572357,47.05393575070236,46.14818655773032,44.4729032632465,46.50571183097396,46.78450494593426,39.86758240982039,39.75480787738195,37.77375501943753,39.11602220183656,36.85118057995942,38.92648831716622,38.05995431585306,36.1489063836155,37.75380571615023,36.71208443176413,44.8008245232115,41.57550912622738,40.29681032689979,42.58852230590467,42.91578591855982,44.63154093058512,42.49575102229949,38.91550824182864,43.93201435909253,42.23662757482737,32.46528960745316,35.72386684882435,33.12718412185405,33.17861974865821,35.18217999826089,34.33713094414425,34.17384131769916,34.81344892067354,33.18777600844944,33.2764308553129,43.53922834690415,41.19057529395353,38.98053371499116,41.85174176704245,41.67892676880611,44.18915781458561,41.76778177960514,39.04707146559427,43.19364339212205,40.9514826356635,37.65479452097471,39.32125508456946,36.45990657560299,39.45477690541047,37.26693306577582,38.52544213637771,37.39382812122843,35.41285720779256,37.83071131381702,37.45643133592781,43.14545446087867,43.77458262212933,42.17425573257405,43.8655798361814,44.49335908194576,45.17442658018129,45.37259584634956,42.86601848873838,44.94113783663119,45.51765420265804]},"options":{"rownames":false,"color":{"colorBy":"Region","colorScale":"scaleOrdinal","colorScheme":"schemeCategory10"},"brushMode":"1D-axes","brushPredicate":"AND","reorderable":false,"margin":{"top":50,"bottom":50,"left":100,"right":50},"alpha":0.5,"mode":false,"bundlingStrength":0.5,"smoothness":0,"width":770,"height":600},"autoresize":false,"tasks":null},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -417,7 +1067,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/fangaomingyu/EDAV-Final-Project/edit/main/results.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/fangaomingyu/EDAV-Final-Project/issues/new" class="toc-action">Report an issue</a></p></div></div></div>
+    </div>
     <div class="nav-footer-right">This book was built with <a href="https://quarto.org/">Quarto</a>.</div>
   </div>
 </footer>
