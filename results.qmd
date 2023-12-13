@@ -17,6 +17,7 @@ cancer$Count <- as.numeric(as.character(cancer$Count))
 cancer <- na.omit(cancer)
 lung_df = cancer[cancer['Leading.Cancer.Sites'] == 'Lung and Bronchus',]
 #unique(cancer['States'])
+lung_df
 ```
 
 
@@ -66,7 +67,7 @@ result_by_states$value <- result_by_states$total_cancer_count
 result_by_states <- na.omit(result_by_states)
 result_by_states <- result_by_states %>% 
   transmute(region = tolower(`region`), value = value, year = Year)
-
+result_by_states
 ```
 
 ```{r}
@@ -84,5 +85,59 @@ for (year in 2002:2011) {
                    legend = "Total Count")
   print(map)
 }
+```
+```{r}
+pm <- read.csv("https://data.cdc.gov/resource/7vdq-ztk9.csv?$query=SELECT%0A%20%20%60year%60%2C%0A%20%20%60statefips%60%2C%0A%20%20max(%60pm25_max_pred%60)%20AS%20%60max_pm25_max_pred%60%2C%0A%20%20avg(%60pm25_pop_pred%60)%20AS%20%60avg_pm25_pop_pred%60%0AGROUP%20BY%20%60year%60%2C%20%60statefips%60")
+ozone <- read.csv("https://data.cdc.gov/resource/kmf5-t9yc.csv?$query=SELECT%0A%20%20%60year2%60%2C%0A%20%20%60statefips%60%2C%0A%20%20max(%60o3_max_pred%60)%20AS%20%60max_o3_max_pred%60%2C%0A%20%20avg(%60o3_pop_pred%60)%20AS%20%60avg_o3_pop_pred%60%0AGROUP%20BY%20%60year2%60%2C%20%60statefips%60")
+```
+
+```{r}
+pm$year <- as.numeric(pm$year)
+ozone$year2 <- as.numeric(ozone$year2)
+```
+
+
+```{r}
+pm_df <- pm %>% 
+  filter(year >= 2002 & year <= 2011)
+
+ozone_df <- ozone %>% 
+  filter(year2 >= 2002 & year2 <= 2011)
+
+
+pm_df <- pm_df[,c('year','statefips','avg_pm25_pop_pred')]
+ozone_df <- ozone_df[,c('year2','statefips','avg_o3_pop_pred')]
+```
+
+
+```{r}
+ozone_df
+```
+```{r}
+cancer_df <- lung_df[,c('States.Code','States',"Year","Count")]
+cancer_df <- cancer_df %>%
+  group_by(States, Year) %>%
+  mutate(total_cancer_count = sum(Count, na.rm = TRUE)) %>%
+  ungroup()
+cancer_df <- cancer_df[,c('States.Code','States','Year','total_cancer_count')]
+cancer_df <- cancer_df %>% distinct()
+#merged_data <- cancer_df %>%
+#  inner_join(pm_df, by = c("state", "year")) %>%
+#  inner_join(ozone_df, by = c("state", "year"))
+cancer_df
+```
+
+```{r}
+merged_data <- cancer_df %>%
+  inner_join(pm_df, by = c("States.Code" = "statefips", "Year" = "year"))
+merged_data <- merged_data %>%
+  inner_join(ozone_df, by = c("States.Code" = "statefips", "Year" = "year2"))
+merged_data
+
+
+```
+```{r}
+
+write.csv(merged_data, "merged_DATA.csv")
 ```
 
