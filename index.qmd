@@ -1,12 +1,31 @@
 # Introduction
-Chosen Topic:
-"Understanding Vaccination Coverage Trends and Disparities Among Young Children Across Different Regions and Demographics"
+Title: Investigating the Relationship Between Air Quality and Cancer Incidence in the United States
 
-We want to choose this topic as vaccination is a critical tool in preventing infectious diseases, and understanding its coverage and disparities is key to ensuring the health and well-being of children worldwide. Despite the known benefits of vaccines, there are significant disparities in vaccination coverage. These disparities can be due to a variety of factors including socio-economic status, geographical location, access to healthcare, etc. Understanding these disparities is crucial for designing targeted interventions to improve vaccination rates.
+Why Choose This Topic:
+
+1. Public Health Impact: Cancer is a leading cause of death globally, and its incidence is on the rise. Investigating the relationship between cancer and air quality can provide insights into environmental factors contributing to cancer risk.
+
+2. Environmental Concerns: Air quality affects the health of millions of people. Poor air quality, characterized by pollutants like particulate matter (PM) has been associated with various health problems, including respiratory and cardiovascular diseases.
+
+3. Policy Implications: Understanding the link between air quality and cancer can inform evidence-based policies and regulations aimed at reducing cancer rates by improving air quality. This research can contribute to more effective public health strategies.
 
 Questions we are interested in studying:
-1. Vaccination Rate Trends Over Time: Analyze the changes in vaccination rates among young children over several years. This would help in identifying any progress or setbacks in vaccination efforts.
 
-2. Regional and Geographical Variations: Examine how vaccination rates vary across different regions or states. This analysis could reveal areas with lower vaccination rates that might require additional public health resources.
+1. Whether certain cancer subtypes (e.g., lung cancer, bladder cancer) show a stronger association with poor air quality? Whether certain states have higher rate of certain cancer subtypes? What are the trends in cancer incidence and air quality over time?
 
-3. Demographic Analysis: Investigate vaccination rates across different demographic groups, including age, insurance coverage, urbanicity, race/ethnicity, and poverty. This could uncover disparities in vaccine coverage and help target interventions more effectively.
+2. Determine if there are geographical areas in the United States with consistently poor air quality and elevated cancer rates. Are there particular pollutants associated with these areas? Are there any outliers in terms of cancer incidence or air quality?
+
+3. Whether there is a statistically significant correlation between long-term exposure to poor air quality (measured by pollutants like PM2.5, ozone, and VOCs) and the incidence of specific cancer types in different regions of the United States?
+
+4. Does the relationship between air quality and cancer rates change over time? Is the impact of air quality on cancer rates consistent across states?
+
+Context About the Measurement of Air Quality:
+
+We would assess air quality using various measurements, including:
+
+1. Daily Ozone Concentrations
+Daily ozone concentrations refer to the levels of ozone (O3) gas in the atmosphere measured on a daily basis. Ozone is a reactive gas composed of three oxygen atoms (O3), and it is a key component of Earth's atmosphere. While ozone high in the stratosphere (stratospheric ozone) plays a crucial role in protecting us from harmful ultraviolet (UV) radiation from the sun, ozone at ground level (tropospheric ozone) is an air pollutant that can have health and environmental impacts.
+
+2. Daily PM2.5 Concentrations
+Daily PM2.5 concentrations refer to the levels of fine particulate matter (PM2.5) in the air measured on a daily basis. PM2.5 refers to tiny airborne particles or aerosols with a diameter of 2.5 micrometers or smaller. These particles are so small that they can be inhaled deeply into the lungs and even enter the bloodstream, posing health risks to humans.
+

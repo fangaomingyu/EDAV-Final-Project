@@ -6,10 +6,10 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Investigating the Relationship Between Air Quality and Cancer Incidence in the United States"
   author:
     - Gaomingyu Fan (gf2514)
-    - Zhaoyi Yu ()
+    - Zhaoyi Yu (zy2612)
   repo-url: https://github.com/fangaomingyu/EDAV-Final-Project
   date: today
   page-footer:
