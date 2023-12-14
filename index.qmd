@@ -1,30 +1,30 @@
 # Introduction
-Title: Investigating the Relationship Between Air Quality and Cancer Incidence in the United States
+Title: Investigating the Relationship Between Air Quality and Lung and Bronchus Cancer in the United States
 
 Why Choose This Topic:
 
-1. Public Health Impact: Cancer is a leading cause of death globally, and its incidence is on the rise. Investigating the relationship between cancer and air quality can provide insights into environmental factors contributing to cancer risk.
+1. Public Health Impact: Lung and Bronchus is a leading cause of death globally, and its incidence is on the rise. Investigating the relationship between cancer and air quality can provide insights into environmental factors contributing to Lung and Bronchus cancer risk.
 
 2. Environmental Concerns: Air quality affects the health of millions of people. Poor air quality, characterized by pollutants like particulate matter (PM) has been associated with various health problems, including respiratory and cardiovascular diseases.
 
-3. Policy Implications: Understanding the link between air quality and cancer can inform evidence-based policies and regulations aimed at reducing cancer rates by improving air quality. This research can contribute to more effective public health strategies.
+3. Policy Implications: Understanding the link between air quality and Lung and Bronchus cancer can inform evidence-based policies and regulations aimed at reducing Lung and Bronchus cancer rates by improving air quality. This research can contribute to more effective public health strategies.
 
 Questions we are interested in studying:
 
-1. Whether certain cancer subtypes (e.g., lung cancer, bladder cancer) show a stronger association with poor air quality? Whether certain states have higher rate of certain cancer subtypes? What are the trends in cancer incidence and air quality over time?
+1. Whether certain states have higher Lung and Bronchus cancer rate? What are the trends in Lung and Bronchus cancer incidence and air quality over time?
 
-2. Determine if there are geographical areas in the United States with consistently poor air quality and elevated cancer rates. Are there particular pollutants associated with these areas? Are there any outliers in terms of cancer incidence or air quality?
+2. Determine if there are geographical areas in the United States with consistently poor air quality and elevated Lung and Bronchus cancer rates. Are there any outliers in terms of cancer incidence or air quality?
 
-3. Whether there is a statistically significant correlation between long-term exposure to poor air quality (measured by pollutants like PM2.5, ozone, and VOCs) and the incidence of specific cancer types in different regions of the United States?
+3. Whether there is a statistically significant correlation between long-term exposure to poor air quality (measured by pollutants like PM2.5 and ozone) and the incidence of Lung and Bronchus cancer in different regions of the United States?
 
-4. Does the relationship between air quality and cancer rates change over time? Is the impact of air quality on cancer rates consistent across states?
+4. Does the relationship between air quality and Lung and Bronchus cancer rates change over time? Is the impact of air quality on cancer rates consistent across states?
 
 Context About the Measurement of Air Quality:
 
 We would assess air quality using various measurements, including:
 
 1. Daily Ozone Concentrations
-Daily ozone concentrations refer to the levels of ozone (O3) gas in the atmosphere measured on a daily basis. Ozone is a reactive gas composed of three oxygen atoms (O3), and it is a key component of Earth's atmosphere. While ozone high in the stratosphere (stratospheric ozone) plays a crucial role in protecting us from harmful ultraviolet (UV) radiation from the sun, ozone at ground level (tropospheric ozone) is an air pollutant that can have health and environmental impacts.
+Daily ozone concentrations in our dataset refer to the levels of ozone (O3) gas within 3 meters of the surface of the earth measured on a daily basis. Ozone is a reactive gas composed of three oxygen atoms (O3), and it is a key component of Earth's atmosphere. While ozone high in the stratosphere (stratospheric ozone) plays a crucial role in protecting us from harmful ultraviolet (UV) radiation from the sun, ozone at ground level (tropospheric ozone) is an air pollutant that can have health and environmental impacts.
 
 2. Daily PM2.5 Concentrations
 Daily PM2.5 concentrations refer to the levels of fine particulate matter (PM2.5) in the air measured on a daily basis. PM2.5 refers to tiny airborne particles or aerosols with a diameter of 2.5 micrometers or smaller. These particles are so small that they can be inhaled deeply into the lungs and even enter the bloodstream, posing health risks to humans.

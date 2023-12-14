@@ -8,11 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
           height = 400 - margin.top - margin.bottom;
 
     // Append the SVG object to the body of the page
-    const svg = d3.select("#scatterplot")
-      .append("svg")
+    const svg = d3.select("#plot1")
+        .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
-      .append("g")
+        .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // Add X and Y scales
@@ -23,12 +23,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const xAxis = svg.append("g").attr("transform", `translate(0,${height})`);
     const yAxis = svg.append("g");
 
+    const xAxisLabel = svg.append("text")
+        .attr("class", "x-axis-label")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom)
+        .style("text-anchor", "middle")
+        .text("PM2.5 Concentration");
+
+    const yAxisLabel = svg.append("text")
+        .attr("class", "y-axis-label")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Lung and bronchus cancer counts/100k people");
 
     const slopeText = svg.append("text")
-        .attr("class", "slope-text") // for styling if needed
-        .attr("x", 10) // x position of the text, adjust as needed
-        .attr("y", 30) // y position of the text, adjust as needed
-        .attr("fill", "black"); // text color
+        .attr("class", "slope-text")
+        .attr("x", 10)
+        .attr("y", 30)
+        .attr("fill", "black");
 
 
     // Function to calculate linear regression
@@ -101,12 +116,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Event listener for the 'Add Utah' button
-        d3.select("#addUtah").on("click", function() {
+        d3.select("#allStates").on("click", function() {
             data = fullData; // Restore original data
             updateChart(data);
         });
+
+        d3.select("#removeKentucky").on("click", function() {
+            data = fullData.filter(d => d.state !== 'Kentucky');
+            updateChart(data);
+        });
+
+        d3.select("#removeVirginia").on("click", function() {
+            data = fullData.filter(d => d.state !== 'West Virginia');
+            updateChart(data);
+        });
+
     }).catch(error => {
         console.error("Error reading the CSV file:", error);
         console.error("Make sure the file path is correct and the server allows access to the file.");
     });
+
 });
