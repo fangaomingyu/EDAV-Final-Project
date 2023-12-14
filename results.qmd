@@ -53,6 +53,7 @@ merged_data <- cancer_df %>%
   inner_join(pm_df, by = c("States.Code" = "statefips", "Year" = "year"))
 merged_data <- merged_data %>%
   inner_join(ozone_df, by = c("States.Code" = "statefips", "Year" = "year2"))
+merged_data$States <- as.character(merged_data$States)
 write.csv(merged_data, "merged_DATA.csv")
 merged_data
 ```
@@ -207,20 +208,21 @@ for(year in unique(spatial_o3$year)) {
 To explore how one variable changes with respect to the other between lung and bronchus cancer rates and PM2.5/Ozone concentrations, we used scatter plot, pearson test, and interactive parallel coordinate plot. 
 
 The following line of best fit in scatter plot shows that lung and bronchus cancer rates and PM2.5 are positively correlated, for most points with higher PM2.5 concentration, it also has higher cancer rate. There are some outliers with low cancer rates but diverse PM2.5 concentration added noise to the fitted line. To know details about those points, we employed interactive scatter plot and discovered that they all belong to Utah. While the average PM2.5 concentration in Utah changed overtime, lung and bronchus cancer rate is consistantly low.
-```{r}
+```{r, warning=FALSE}
 ggplot(merged_data, aes(x = avg_pm25_pop_pred, y = total_cancer_rate)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(title = "Scatter Plot of Cancer Counts vs PM2.5", x = "Average PM2.5",  y = "Total Cancer Rate")
 ```
-```{r}
+```{r, warning=FALSE}
 plot_ly(merged_data, x = ~avg_pm25_pop_pred, y = ~total_cancer_rate,
         color = ~as.factor(Year), text= ~States,
         hoverinfo = 'text') 
 ```
 
+
 The following line of best fit in scatter plot shows barely any correlation between lung and bronchus cancer rates and ozone concentration, for points with high ozone concentration, lung and bronchus cancer rate can be both high or low. There are some outliers that have high ozone concentration level but low cancer rate. The fitted line is slightly downward because of those outliers. To know details about those points, we employed interactive scatter plot and again discovered that they all belong to Utah. While the average ozone concentration in Utah is consistently high comparing to other states, it also has very low lung cancer rates comparing to other states.
-```{r}
+```{r, warning=FALSE}
 ggplot(merged_data, aes(x = avg_o3_pop_pred, y = total_cancer_rate)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
@@ -229,17 +231,20 @@ ggplot(merged_data, aes(x = avg_o3_pop_pred, y = total_cancer_rate)) +
        y = "Total Cancer Rate")
 ```
 
-```{r}
+```{r, warning=FALSE}
 plot_ly(merged_data, x = ~avg_o3_pop_pred, y = ~total_cancer_rate,
         color = ~as.factor(Year), text= ~States,
         hoverinfo = 'text') 
 ```
+
 
 The Pearson correlation test provides a coefficient (r) that quantifies the strength and direction of the linear relationship between two continuous variables. For value close to 1, it indicates positive linear correlation. Based on our data, cancer rates and PM2.5 concentration has correlation 0.4470339. It could be higher without outliers. The p value is 2.2e-16, much smaller than 0.01, which highly suggests that true correlation between lung cancer and PM2.5 concentration is not 0.
 ```{r}
 correlation_test_pearson <- cor.test(merged_data$total_cancer_rate, merged_data$avg_pm25_pop_pred, method = "pearson")
 print(correlation_test_pearson)
 ```
+
+
 Finally to take a look at the relationships among cancer rate, PM2.5 concentration, and Ozone concentration. It's not clear if PM2.5 and Ozone concentration are correlated as some data shows negative relationship and some shows positive. But it's clear that Utah always has the lowest lung and bronchus cancer rate.
 ```{r}
 merged_data %>% 
