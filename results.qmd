@@ -22,11 +22,11 @@ library(plotly)
 ```
 
 Merge cancer, PM2.5, and Ozone data by year and states.
-```{r}
+```{r, warning=FALSE}
 cancer <- read.csv('cancer.csv')
 #unique(cancer$Leading.Cancer.Sites)
 cancer$Count <- as.numeric(as.character(cancer$Count))
-cancer$Crude.Rate <- as.numeric(cancer$Crude.Rate)
+cancer$Population <- as.numeric(cancer$Population)
 cancer <- na.omit(cancer)
 lung_df = cancer[cancer['Leading.Cancer.Sites'] == 'Lung and Bronchus',]
 
@@ -40,12 +40,13 @@ ozone_df <- ozone %>% filter(year2 >= 2002 & year2 <= 2011)
 pm_df <- pm_df[,c('year','statefips','avg_pm25_pop_pred')]
 ozone_df <- ozone_df[,c('year2','statefips','avg_o3_pop_pred')]
 
-cancer_df <- lung_df[,c('States.Code','States',"Year","Count")]
+cancer_df <- lung_df[,c('States.Code','States',"Year","Count","Population")]
 cancer_df <- cancer_df %>%
   group_by(States, Year) %>%
-  mutate(total_cancer_count = sum(Count, na.rm = TRUE)) %>%
+  mutate(total_cancer_rate = sum(Count, na.rm = TRUE)/sum(Population, na.rm = TRUE) * 100000) %>%
   ungroup()
-cancer_df <- cancer_df[,c('States.Code','States','Year','total_cancer_count')]
+cancer_df <- cancer_df[,c('States.Code','States','Year','total_cancer_rate')]
+cancer_df$total_cancer_rate <- round(cancer_df$total_cancer_rate, 1)
 cancer_df <- cancer_df %>% distinct()
 
 merged_data <- cancer_df %>%
@@ -57,45 +58,33 @@ merged_data
 ```
 
 ### Cancer
-We want to identify long-term increases or decreases in the lung and bronchus cancer incidences for each state in US. The following line plots show that lung and bronchus cancer counts is generally increasing from 2001 to 2010 for all states.
+We want to identify long-term increases or decreases in the lung and bronchus cancer incidences for each state in US. The following line plots show that lung and bronchus cancer counts among 100k people is stable from 2001 to 2010 for all states. 
 
-```{r}
-
-result_by_states <- lung_df %>%
+```{r, warning=FALSE}
+result_by_states <- cancer_df %>%
   group_by(States, Year) %>%
-  summarize(total_cancer_count = sum(Count, na.rm = TRUE))
+  summarize(total_cancer_rate = mean(total_cancer_rate, na.rm = TRUE))
 
-result_total <- lung_df %>%
+ggplot(result_by_states, aes(x = Year, y = total_cancer_rate, group = States, color = States)) +
+  geom_line() +
+  labs(title = "Trend of Cancer Counts by Year and State",
+       x = "Year",
+       y = "Total Cancer Rate") +
+  theme_minimal()
+```
+After taking the average of cancer counts among 100k people for all states, we discovered the lung and bronchus cancer counts is first going up and then decrease.
+```{r}
+result_total <- cancer_df %>%
   group_by(Year) %>%
-  summarize(total_cancer_count = sum(Count, na.rm = TRUE))
+  summarize(total_cancer_rate = mean(total_cancer_rate, na.rm = TRUE))
 
-#result_by_states
-#result_total
-
-```
-```{r}
-ggplot(result_by_states, aes(x = Year, y = total_cancer_count, group = States, color = States)) +
-  geom_line() +
-  labs(title = "Trend of Cancer Counts by Year and State",
+ggplot(result_total, aes(x = Year, y = total_cancer_rate)) +
+  geom_point() +
+  labs(title = "Trend of Average Cancer Rate by Year",
        x = "Year",
-       y = "Total Cancer Count") +
-  theme_minimal() +
-  scale_color_viridis_d()
-```
-
-```{r}
-ggplot(result_total, aes(x = Year, y = total_cancer_count)) +
-  geom_line() +
-  labs(title = "Trend of Cancer Counts by Year and State",
-       x = "Year",
-       y = "Total Cancer Count") +
+       y = "Total Cancer Rate") +
   theme_minimal() + 
   geom_smooth(method = "loess", span = .7, se = FALSE)
-```
-
-```{r}
-g <- ggplot(result_total, aes(x = Year, y = total_cancer_count)) + geom_point()
-g + geom_smooth(method = "loess", span = .7, se = FALSE)
 ```
 
 ### pm2.5
@@ -107,8 +96,7 @@ ggplot(merged_data, aes(x = Year, y = avg_pm25_pop_pred, color = States)) +
   labs(title = "Trend of Daily PM2.5 Concentrations by Year and State",
        x = "Year",
        y = "Daily PM2.5 Concentrations") +
-  theme_minimal() +
-  scale_color_viridis_d()
+  theme_minimal()
 ```
 
 ```{r}
@@ -117,10 +105,10 @@ avg_pm_per_year <- pm %>%
   summarise(average_pm25 = mean(avg_pm25_pop_pred))
 
 g <- ggplot(avg_pm_per_year, aes(year, average_pm25)) +
-  geom_line() +
+  geom_point() +
   ggtitle("Average Daily PM2.5 Concentrations in US, 2001-2016") +
   xlab("2001-2016")
-g + geom_smooth(method = "loess", span = .7, se = FALSE)
+g + geom_smooth(method = "loess", span = .5, se = FALSE)
 ```
 
 ### Ozone
@@ -132,8 +120,7 @@ ggplot(merged_data, aes(x = Year, y = avg_o3_pop_pred, color = States)) +
   labs(title = "Trend of Daily PM2.5 Concentrations by Year and State",
        x = "Year",
        y = "Daily Ozone Concentrations") +
-  theme_minimal() +
-  scale_color_viridis_d()
+  theme_minimal()
 ```
 
 ```{r}
@@ -141,20 +128,20 @@ avg_o3_per_year <- ozone %>%
   group_by(year2) %>%
   summarise(average_o3 = mean(avg_o3_pop_pred))
 g <- ggplot(avg_o3_per_year, aes(year2, average_o3)) +
-  geom_line() +
+  geom_point() +
   ggtitle("Average Daily Ozone Concentration in US, 2001-2016") +
   xlab("2001-2016")
-g + geom_smooth(method = "loess", span = .7, se = FALSE)
+g + geom_smooth(method = "loess", span = .5, se = FALSE)
 ```
 
 ## Spatial Analysis
 
-###Cancer
-We want to identify some geographical patterns of lung and bronchus cancer incidences for each state in US. The following choropleth maps use color to indicate the value of cancer incidences within each state. Deep color indicates more cancer incidences. Top states with higher cancer incidences are the same from 2001 to 2011.
+### Cancer
+We want to identify some geographical patterns of lung and bronchus cancer incidences for each state in US. The following choropleth maps use color to indicate the value of cancer incidences within each state. Deep color indicates more cancer incidences. Top states with higher cancer incidences are the same from 2001 to 2011, includes Maine, Kentucky, and West Virginia. 
 
-```{r}
+```{r, warning=FALSE}
 result_by_states$region <- result_by_states$States
-result_by_states$value <- result_by_states$total_cancer_count
+result_by_states$value <- result_by_states$total_cancer_rate
 #result_by_states<-result_by_states[,c('region','value','Year')]
 result_by_states <- na.omit(result_by_states)
 result_by_states <- result_by_states %>% 
@@ -162,7 +149,7 @@ result_by_states <- result_by_states %>%
 #result_by_states
 ```
 
-```{r}
+```{r, warning=FALSE}
 
 
 for (year in 2002:2011) {
@@ -179,9 +166,9 @@ for (year in 2002:2011) {
 }
 ```
 ### PM2.5
-We want to identify some geographical patterns of PM2.5 concentrations for each state in US. The following choropleth maps use color to indicate the value of population weighted averaged PM2.5 concentrations in μg/m3 for each state. Deep color indicates higher PM2.5 concentrations. Ohio and Indiana have leading PM2.5 concentrations every year from 2001 to 2011.
+We want to identify some geographical patterns of PM2.5 concentrations for each state in US. The following choropleth maps use color to indicate the value of population weighted averaged PM2.5 concentrations in μg/m3 for each state. Deep color indicates higher PM2.5 concentrations. Ohio and Indiana have leading PM2.5 concentrations every year from 2001 to 2011. Population weighted average PM2.5 concentrations in alaska and hawaii are not included in the original dataset so they are black on the map.
 
-```{r}
+```{r, warning=FALSE}
 spatial_pm <- merged_data %>% 
   transmute(region = tolower(States), value = avg_pm25_pop_pred, year = Year)
 
@@ -198,9 +185,9 @@ for(year in unique(spatial_pm$year)) {
 ```
 
 ### Ozone
-We want to identify some geographical patterns of Ozone concentrations for each state in US. The following choropleth maps use color to indicate the value of population weighted averaged and yearly averaged 8-hour average ozone concentration in parts per billion within 3 meters of the surface of the earth for each state. Deep color indicates higher Ozone concentrations. Utah, Arizona, and New Mexico have leading PM2.5 concentrations every year from 2001 to 2011.
+We want to identify some geographical patterns of Ozone concentrations for each state in US. The following choropleth maps use color to indicate the value of population weighted averaged and yearly averaged 8-hour average ozone concentration in parts per billion within 3 meters of the surface of the earth for each state. Deep color indicates higher Ozone concentrations. Utah, Arizona, and New Mexico have leading PM2.5 concentrations every year from 2001 to 2011. Population weighted average Ozone concentrations in alaska and hawaii are not included in the original dataset so they are black on the map.
 
-```{r}
+```{r, warning=FALSE}
 spatial_o3 <- merged_data %>% 
   transmute(region = tolower(States), value = avg_o3_pop_pred, year = Year)
 
@@ -215,57 +202,48 @@ for(year in unique(spatial_o3$year)) {
 }
 ```
 
-## Correlations between lung and bronchus cancer rates and PM2.5/Ozone concentrations
+## Correlations Cetween Lung and Bronchus Cancer and PM2.5/Ozone Concentrations
 
-To explore the correlations or how one variable changes with respect to the other between lung and bronchus cancer rates and PM2.5/Ozone concentrations, we used scatter plot, pearson test, and interactive parallel coordinate plot. 
-The following line of best fit in scatter plot shows that lung and bronchus cancer rates and PM2.5 are positively correlated, for points with higher PM2.5 concentration, it also has higher cancer rate. 
+To explore how one variable changes with respect to the other between lung and bronchus cancer rates and PM2.5/Ozone concentrations, we used scatter plot, pearson test, and interactive parallel coordinate plot. 
+
+The following line of best fit in scatter plot shows that lung and bronchus cancer rates and PM2.5 are positively correlated, for most points with higher PM2.5 concentration, it also has higher cancer rate. There are some outliers with low cancer rates but diverse PM2.5 concentration added noise to the fitted line. To know details about those points, we employed interactive scatter plot and discovered that they all belong to Utah. While the average PM2.5 concentration in Utah changed overtime, lung and bronchus cancer rate is consistantly low.
 ```{r}
-ggplot(merged_data, aes(x = avg_pm25_pop_pred, y = total_cancer_count)) +
+ggplot(merged_data, aes(x = avg_pm25_pop_pred, y = total_cancer_rate)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Scatter Plot of Cancer Counts vs PM2.5", x = "Average PM2.5",  y = "Total Cancer Count")
+  labs(title = "Scatter Plot of Cancer Counts vs PM2.5", x = "Average PM2.5",  y = "Total Cancer Rate")
+```
+```{r}
+plot_ly(merged_data, x = ~avg_pm25_pop_pred, y = ~total_cancer_rate,
+        color = ~as.factor(Year), text= ~States,
+        hoverinfo = 'text') 
 ```
 
-The following line of best fit in scatter plot gives no correlation between lung and bronchus cancer rates and ozone concentration, for points with high ozone concentration, lung and bronchus cancer rate can be both high or low.
+The following line of best fit in scatter plot shows barely any correlation between lung and bronchus cancer rates and ozone concentration, for points with high ozone concentration, lung and bronchus cancer rate can be both high or low. There are some outliers that have high ozone concentration level but low cancer rate. The fitted line is slightly downward because of those outliers. To know details about those points, we employed interactive scatter plot and again discovered that they all belong to Utah. While the average ozone concentration in Utah is consistently high comparing to other states, it also has very low lung cancer rates comparing to other states.
 ```{r}
-ggplot(merged_data, aes(x = avg_pm25_pop_pred, y = total_cancer_count)) +
+ggplot(merged_data, aes(x = avg_o3_pop_pred, y = total_cancer_rate)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(title = "Scatter Plot of Cancer Counts vs Ozone", 
        x = "Average Daily Ozone Concentration",  
-       y = "Total Cancer Count")
+       y = "Total Cancer Rate")
 ```
 
 ```{r}
-ggplot(merged_data, aes(avg_pm25_pop_pred, y = total_cancer_count)) + 
-  geom_hex(bins=12) +
-  scale_fill_gradient(low = "grey", high = "purple") +  
-  theme_classic(18) +
-  ggtitle("Heatmap of Cancer Counts vs PM2.5")
+plot_ly(merged_data, x = ~avg_o3_pop_pred, y = ~total_cancer_rate,
+        color = ~as.factor(Year), text= ~States,
+        hoverinfo = 'text') 
 ```
 
+The Pearson correlation test provides a coefficient (r) that quantifies the strength and direction of the linear relationship between two continuous variables. For value close to 1, it indicates positive linear correlation. Based on our data, cancer rates and PM2.5 concentration has correlation 0.4470339. It could be higher without outliers. The p value is 2.2e-16, much smaller than 0.01, which highly suggests that true correlation between lung cancer and PM2.5 concentration is not 0.
 ```{r}
-ggplot(merged_data, aes(avg_o3_pop_pred, y = total_cancer_count)) + 
-  geom_hex(bins=12) +
-  scale_fill_gradient(low = "grey", high = "purple") +  
-  theme_classic(18) +
-  ggtitle("Scatter Plot of Cancer Counts vs Ozone")
-```
-
-The Pearson correlation test provides a coefficient (r) that quantifies the strength and direction of the linear relationship between two continuous variables. For value close to 0, like -0.04076092 for cancer rates and ozone concentration, it implies no linear correlation. For value close to 1, it indicates positive linear correlation. 
-```{r}
-correlation_test_pearson <- cor.test(merged_data$total_cancer_count, merged_data$avg_pm25_pop_pred, method = "pearson")
+correlation_test_pearson <- cor.test(merged_data$total_cancer_rate, merged_data$avg_pm25_pop_pred, method = "pearson")
 print(correlation_test_pearson)
 ```
-
-```{r}
-correlation_test_pearson <- cor.test(merged_data$total_cancer_count, merged_data$avg_o3_pop_pred, method = "pearson")
-print(correlation_test_pearson)
-```
-
+Finally to take a look at the relationships among cancer rate, PM2.5 concentration, and Ozone concentration. It's not clear if PM2.5 and Ozone concentration are correlated as some data shows negative relationship and some shows positive. But it's clear that Utah always has the lowest lung and bronchus cancer rate.
 ```{r}
 merged_data %>% 
-  select(c("States","total_cancer_count","avg_pm25_pop_pred","avg_o3_pop_pred")) %>%
+  select(c("States","total_cancer_rate","avg_pm25_pop_pred","avg_o3_pop_pred")) %>%
   arrange(merged_data) %>%
   parcoords(rownames = FALSE,
             brushMode = "1D-axes",
