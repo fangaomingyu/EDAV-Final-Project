@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .attr("x", width / 2)
         .attr("y", height + margin.bottom)
         .style("text-anchor", "middle")
-        .text("PM2.5 Concentration");
+        .text("Ozone Concentration within 3 meters of the surface of earth");
 
     const yAxisLabel = svg.append("text")
         .attr("class", "y-axis-label")
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update scales
         x.domain([0, d3.max(data, d => d.x)]);
-        y.domain([0, d3.max(data, d => d.y)]);
+        y.domain([30, d3.max(data, d => d.y)]);
 
         // Update axes
         xAxis.transition().duration(1000).call(d3.axisBottom(x));
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Read and process the CSV data
     d3.csv(csvFilePath, row => {
         return {
-            x: +row.avg_pm25_pop_pred,
+            x: +row.avg_o3_pop_pred,
             y: +row.total_cancer_rate,
             state: row.States
         };
@@ -121,13 +121,13 @@ document.addEventListener('DOMContentLoaded', function() {
             updateChart(data);
         });
 
-        d3.select("#removeKentucky").on("click", function() {
-            data = fullData.filter(d => d.state !== 'Kentucky');
+        d3.select("#removeColorodo").on("click", function() {
+            data = fullData.filter(d => d.state !== 'Colorado');
             updateChart(data);
         });
 
-        d3.select("#removeVirginia").on("click", function() {
-            data = fullData.filter(d => d.state !== 'West Virginia');
+        d3.select("#removeBoth").on("click", function() {
+            data = fullData.filter(d => d.state !== 'Colorado' && d.state !== 'Utah');
             updateChart(data);
         });
 

@@ -55,7 +55,7 @@ merged_data <- merged_data %>%
   inner_join(ozone_df, by = c("States.Code" = "statefips", "Year" = "year2"))
 merged_data$States <- as.character(merged_data$States)
 write.csv(merged_data, "merged_DATA.csv")
-merged_data
+head(merged_data)
 ```
 
 ### Cancer
@@ -74,7 +74,7 @@ ggplot(result_by_states, aes(x = Year, y = total_cancer_rate, group = States, co
   theme_minimal()
 ```
 After taking the average of cancer counts among 100k people for all states, we discovered the lung and bronchus cancer counts is first going up and then decrease.
-```{r}
+```{r warning=FALSE}
 result_total <- cancer_df %>%
   group_by(Year) %>%
   summarize(total_cancer_rate = mean(total_cancer_rate, na.rm = TRUE))
@@ -100,7 +100,7 @@ ggplot(merged_data, aes(x = Year, y = avg_pm25_pop_pred, color = States)) +
   theme_minimal()
 ```
 
-```{r}
+```{r warning=FALSE}
 avg_pm_per_year <- pm %>%
   group_by(year) %>%
   summarise(average_pm25 = mean(avg_pm25_pop_pred))
@@ -124,7 +124,7 @@ ggplot(merged_data, aes(x = Year, y = avg_o3_pop_pred, color = States)) +
   theme_minimal()
 ```
 
-```{r}
+```{r warning=FALSE}
 avg_o3_per_year <- ozone %>%
   group_by(year2) %>%
   summarise(average_o3 = mean(avg_o3_pop_pred))
@@ -147,14 +147,13 @@ result_by_states$value <- result_by_states$total_cancer_rate
 result_by_states <- na.omit(result_by_states)
 result_by_states <- result_by_states %>% 
   transmute(region = tolower(`region`), value = value, year = Year)
-#result_by_states
 ```
 
 ```{r, warning=FALSE}
 
 
 # ggplot2 Boxplot
-ggplot(result_by_states, aes(x = States, y = total_cancer_rate)) +
+ggplot(result_by_states, aes(x = States, y = value)) +
   geom_boxplot() +
   xlab("States") +
   ylab("Total Cancer Rate") +

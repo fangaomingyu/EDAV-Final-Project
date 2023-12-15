@@ -17,14 +17,12 @@ Questions we are interested in studying:
 
 3. Whether there is a statistically significant correlation between long-term exposure to poor air quality (measured by pollutants like PM2.5 and ozone) and the incidence of Lung and Bronchus cancer in different regions of the United States?
 
-4. Does the relationship between air quality and Lung and Bronchus cancer rates change over time? Is the impact of air quality on cancer rates consistent across states?
-
 Context About the Measurement of Air Quality:
 
 We would assess air quality using various measurements, including:
 
 1. Daily Ozone Concentrations
-Daily ozone concentrations in our dataset refer to the levels of ozone (O3) gas within 3 meters of the surface of the earth measured on a daily basis. Ozone is a reactive gas composed of three oxygen atoms (O3), and it is a key component of Earth's atmosphere. While ozone high in the stratosphere (stratospheric ozone) plays a crucial role in protecting us from harmful ultraviolet (UV) radiation from the sun, ozone at ground level (tropospheric ozone) is an air pollutant that can have health and environmental impacts.
+Daily ozone concentrations in our dataset refer to the levels of ozone (O3) gas within 3 meters of the surface of the earth measured on a daily basis. Ozone is a reactive gas composed of three oxygen atoms (O3), and it is a key component of Earth's atmosphere. While ozone high in the stratosphere (stratospheric ozone) plays a crucial role in protecting us from harmful ultraviolet (UV) radiation from the sun, ozone at ground level (tropospheric ozone) is an air pollutant that can have health and environmental impacts. In our research, ozone within 3 meters of the surface of the earth stand for ground level ozone and thus we expect a negative impact on human health.
 
 2. Daily PM2.5 Concentrations
 Daily PM2.5 concentrations refer to the levels of fine particulate matter (PM2.5) in the air measured on a daily basis. PM2.5 refers to tiny airborne particles or aerosols with a diameter of 2.5 micrometers or smaller. These particles are so small that they can be inhaled deeply into the lungs and even enter the bloodstream, posing health risks to humans.
