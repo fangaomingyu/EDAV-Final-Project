@@ -153,18 +153,14 @@ result_by_states <- result_by_states %>%
 ```{r, warning=FALSE}
 
 
-for (year in 2002:2011) {
-  # Subset data for the specific year
-  yearly_data <- result_by_states[result_by_states$year == year, ]
-  yearly_data <- yearly_data[, c('region', 'value')]
+# ggplot2 Boxplot
+ggplot(result_by_states, aes(x = States, y = total_cancer_rate)) +
+  geom_boxplot() +
+  xlab("States") +
+  ylab("Total Cancer Rate") +
+  ggtitle("Box Plot of Total Cancer Rate by State") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Rotate x-axis labels if needed
 
-  # Create and plot the choropleth map
-  map_title <- paste("State Cancer - Year", year)
-  map <- state_choropleth(yearly_data,
-                   title = map_title,
-                   legend = "Total Count")
-  print(map)
-}
 ```
 ### PM2.5
 We want to identify some geographical patterns of PM2.5 concentrations for each state in US. The following choropleth maps use color to indicate the value of population weighted averaged PM2.5 concentrations in μg/m3 for each state. Deep color indicates higher PM2.5 concentrations. Ohio and Indiana have leading PM2.5 concentrations every year from 2001 to 2011. Population weighted average PM2.5 concentrations in alaska and hawaii are not included in the original dataset so they are black on the map.
@@ -243,9 +239,14 @@ The Pearson correlation test provides a coefficient (r) that quantifies the stre
 correlation_test_pearson <- cor.test(merged_data$total_cancer_rate, merged_data$avg_pm25_pop_pred, method = "pearson")
 print(correlation_test_pearson)
 ```
+Then we test the correlation between ozone and cancer rates. Based on our data, cancer rates and ozone concentration has correlation -0.2666176. It could be lower without outliers. The p value is 2.105e-09, much smaller than 0.01, which highly suggests that there is a negative correlation between lung cancer and ozone concentration. However, this finding is strange because ground-level ozone, is “bad” because it can trigger a variety of health problems. So intuitively, there shouldn't exisit negative correlation between ozone concentration and people's wellness.  
 
+```{r}
+correlation_test_pearson <- cor.test(merged_data$total_cancer_rate, merged_data$avg_o3_pop_pred, method = "pearson")
+print(correlation_test_pearson)
+```
 
-Finally to take a look at the relationships among cancer rate, PM2.5 concentration, and Ozone concentration. It's not clear if PM2.5 and Ozone concentration are correlated as some data shows negative relationship and some shows positive. But it's clear that Utah always has the lowest lung and bronchus cancer rate.
+The correlation between these variables might be clearer after we removing outliers. To identify outliers, we take at the parallel coordinate graph among cancer rate, PM2.5 concentration, and Ozone concentration. It's not clear if PM2.5 and Ozone concentration are correlated as some data shows negative relationship and some shows positive. But it's clear that Utah always has the lowest lung and bronchus cancer rate.
 ```{r}
 merged_data %>% 
   select(c("States","total_cancer_rate","avg_pm25_pop_pred","avg_o3_pop_pred")) %>%
@@ -261,7 +262,41 @@ merged_data %>%
             height = 600)
 ```
 
+From the graph above, we notice that there are some outliers states, here we using z-score and IQR methods to examine each state, and we notice that Utah, Kentucky, West Virginia are outliers. In the following interactive graph, we will see if removing these states from the data frame will change the regression line of total cancer rate and avergae pm2.5.  
+```{r}
+z_score <- function(x) {
+  (x - mean(x)) / sd(x)
+}
 
+# Calculate Z-score for each variable
+merged_data$z_pm25 <- z_score(merged_data$avg_pm25_pop_pred)
+merged_data$z_cancer_count <- z_score(merged_data$total_cancer_rate)
 
+# Identify outliers (Z-score > 3 or < -3)
+outliers_z <- subset(merged_data, abs(z_pm25) > 3 | abs(z_cancer_count) > 3)
+
+iqr_pm25 <- IQR(merged_data$avg_pm25_pop_pred)
+iqr_cancer_count <- IQR(merged_data$total_cancer_rate)
+
+# Calculate the bounds
+lower_bound_pm25 <- quantile(merged_data$avg_pm25_pop_pred, 0.25) - 1.5 * iqr_pm25
+upper_bound_pm25 <- quantile(merged_data$avg_pm25_pop_pred, 0.75) + 1.5 * iqr_pm25
+lower_bound_cancer_count <- quantile(merged_data$total_cancer_rate, 0.25) - 1.5 * iqr_cancer_count
+upper_bound_cancer_count <- quantile(merged_data$total_cancer_rate, 0.75) + 1.5 * iqr_cancer_count
+
+# Identify outliers
+outliers_iqr <- subset(merged_data, avg_pm25_pop_pred < lower_bound_pm25 | avg_pm25_pop_pred > upper_bound_pm25 |
+                              total_cancer_rate < lower_bound_cancer_count | total_cancer_rate > upper_bound_cancer_count)
+
+combined_outliers <- unique(rbind(outliers_z, outliers_iqr))
+print(unique(combined_outliers$States))
+```
+
+For ozone concentration, we want to see if there is any difference after removing outliers, first we identify for outliers. We notice that Utah and Colorado are two outliers. After removing these states, the correlation become weaker, decreasing from -0.2666176 to -0.09481011. Also, the p-value is 0.04013, which is larger than alpha 0.01, so we cannot reject the null hypothesis. Thus, there is no association between total cancer rate and average ozone concentration. 
+```{r}
+filtered_df <- subset(merged_data, !(States %in% c("Utah","Colorado")))
+correlation_test_pearson <- cor.test(filtered_df$total_cancer_rate, filtered_df$avg_o3_pop_pred, method = "pearson")
+print(correlation_test_pearson)
+```
 
 
